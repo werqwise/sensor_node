@@ -24,6 +24,7 @@
 - [About](#about)
 - [Getting Started](#getting_started)
 - [Installing](#installing)
+- [Circuit Diagram](#circuit)
 - [Mesh Architecture](#circuit)
 - [Usage](#usage)
 - [Built Using](#built_using)
