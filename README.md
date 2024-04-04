@@ -51,6 +51,12 @@ What things you need to install the software and how to install them.
 
 A step by step series that tell you how to get the Firmware and Backend running
 
+#### One-click Installation
+
+```diff
+! Work in progress
+```
+
 #### Platform.io Configs
 
 You should have Platform.io installed with the following pre-reqs
@@ -100,6 +106,42 @@ To make the firmware ready for the Raspberry Pi
 2.  Line number 58 checks whether there's any incomming data and it contains any node information, if yes, it parses it within its block and publishes it to the MQTT broker.
 3.  While line number 75 listens to the Acknowledgement messages from the Bridge Node.
 
+## Circuit <a name = "circuit"></a>
+
+```diff
+! Work in progress
+```
+
+### ESP32 Dev Module Pinout
+
+
+Follow the pinout diagram given below to connect different components to your TTGO LORA32 board.
+
+![LoraPinout](Circuit/ESP32-Pinout.jpg)
+
+
+
+### Circuit Diagram for Smart Joystick
+
+Here's the complete circuit diagram of the system.
+
+![CircuitDiagram](Circuit/Circuit_bb.png)
+
+### Components Connections
+
+```http
+Other components pin connection details
+```
+
+#### Limit Switch
+
+```Buttons Connections with ESP32```
+
+| Limit Switch Pins | ESP32 | 
+| :--- | :--- | 
+| `PIN1` | `12` |
+
+
 ## 🔧 Mesh Architecture <a name = "circuit"></a>
 
 High level architecture of the Mesh network
@@ -113,6 +155,40 @@ High level architecture of the Mesh network
 3.  Connect Bridge Node to any USB port of the Raspberry Pi and then run the Firmware.
 4.  There could be unlimited number of sensor nodes in the mesh network.
 
+## Web App <a name="webapp"></a>
+```diff
++ For future use
+```
+[Dashboard Link: ]()
+
+You can access the webapp with following test acccount credentials
+
+*   Email Address: `test@test.com`
+*   Password: `test`
+
+### Dashboard Screenshots
+
+```diff
++ For future use
+```
+
+## Smartphone App <a name="smartphoneapp"></a>
+```diff
++ For future use
+```
+[Smartphone App Link: ]()
+
+## List of Components <a name = "list"></a>
+```diff
++ For future use; not a comprehensive list
+```
+Following components are used to make this project
+
+1.  [ESP32 Dev Kit Module]()
+2.  [Micro USB Cable](https://www.amazon.com/Android-Charger-sweguard-Charging-Phone-Grey/dp/B09MT18H3J/ref=sr_1_2_sspa?keywords=micro+usb+cable&qid=1661962441&sprefix=micro+usb+%2Caps%2C181&sr=8-2-spons&psc=1&spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUEzVkw1N1RQVTVHTVA3JmVuY3J5cHRlZElkPUEwODYyODU0MUdBSDQwTjBWVDZVSiZlbmNyeXB0ZWRBZElkPUEwODMyNjQyMVo4WU1VOVQ5UlMzQiZ3aWRnZXROYW1lPXNwX2F0ZiZhY3Rpb249Y2xpY2tSZWRpcmVjdCZkb05vdExvZ0NsaWNrPXRydWU=)
+
+
+
 ## ⛏️ Built Using <a name = "built_using"></a>
 
 - [Platform.io](https://platformio.org/) - Embedded Development Environment
@@ -120,7 +196,9 @@ High level architecture of the Mesh network
 - [Python](https://www.python.org/) - Programming Language
 
 ## Demo Video
-  - [MeshTracker](https://youtu.be/scoSdehjTmo) - SensioMesh Demo Video
+```diff
++ For future use
+```
 
 ## ✍️ Authors <a name = "authors"></a>
 
