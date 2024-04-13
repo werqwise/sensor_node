@@ -3,6 +3,8 @@
 #include <Arduino.h>
 #include "SStack.h"
 #include <ArduinoJson.h>
+#include <SensorManager.h>
+#include <bme280_handler.h>
 
 #define LED 2 // GPIO number of connected LED, ON ESP-12 IS GPIO2
 
@@ -79,6 +81,8 @@ void setup()
   Serial.print("TrackerID: ");
   Serial.println(TrackerID);
   pinMode(LED, OUTPUT);
+  SensorManager sensors;
+  sensors.auto_setup("BME680", setup_bme280, 5, 1);
 
   mesh.setDebugMsgTypes(ERROR | DEBUG);
   mesh.init(MESH_SSID, MESH_PASSWORD, &userScheduler, MESH_PORT);
@@ -138,7 +142,10 @@ void sendMessage()
     calc_delay = false;
   }
   meshManager.addSensor("time", String(millis()));
-  meshManager.addSensor("time_2", String(millis()+1));
+  meshManager.addSensor("temperature", String(get_temperature()));
+  meshManager.addSensor("humidity", String(get_humidity()));
+  meshManager.addSensor("pressure", String(get_pressure()));
+  meshManager.addSensor("altitude", String(get_altitude()));
   meshManager.send();
   taskSendMessage.setInterval(TASK_SECOND * 1.5); // between 1 and 5 seconds
 }
