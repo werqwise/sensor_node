@@ -1,7 +1,8 @@
 
-//Sensor Node; Could be unlimited in number
+// Sensor Node; Could be unlimited in number
 #include <Arduino.h>
 #include "SStack.h"
+#include <ArduinoJson.h>
 
 #define LED 2 // GPIO number of connected LED, ON ESP-12 IS GPIO2
 
@@ -24,7 +25,6 @@ painlessMesh mesh;
 bool calc_delay = false;
 SimpleList<uint32_t> nodes;
 
-// void sendMessage();                                                // Prototype
 Task taskSendMessage(TASK_SECOND * 1.5, TASK_FOREVER, &sendMessage); // start with a one second interval
 
 // Task to blink the number of nodes
@@ -33,26 +33,58 @@ bool onFlag = false;
 String TrackerID = "";
 float healthTimer = 0;
 
+class MeshManager
+{
+public:
+  MeshManager(painlessMesh &meshRef) : mesh(meshRef)
+  {
+    mesh.setDebugMsgTypes(ERROR | DEBUG);
+    mesh.init(MESH_SSID, MESH_PASSWORD, &userScheduler, MESH_PORT);
+    mesh.onReceive(receivedCallback);
+    mesh.onNewConnection(&newConnectionCallback);
+    mesh.onChangedConnections(&changedConnectionCallback);
+    mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
+    mesh.onNodeDelayReceived(&delayReceivedCallback);
+    mesh.setContainsRoot(true);
+  }
+
+  void addSensor(const String &name, const String &value)
+  {
+    sensorData[name] = value;
+  }
+
+  void send()
+  {
+
+    JsonDocument doc; // Adjust size as necessary based on expected JSON size
+
+    doc["macAddress"] = WiFi.macAddress();
+    doc["rssi"] = WiFi.RSSI();
+    for (const auto &kv : sensorData)
+    {
+      doc[kv.first] = kv.second;
+    }
+    String msg;
+    serializeJson(doc, msg);
+    mesh.sendBroadcast(msg);
+    Serial.println("Sending JSON: " + msg);
+  }
+
+private:
+  painlessMesh &mesh;
+  std::map<String, String> sensorData;
+};
+
+MeshManager meshManager(mesh);
+
 void setup()
 {
   Serial.begin(115200);
 
   TrackerID = String(WiFi.macAddress());
-  TrackerID = StringSeparator(TrackerID, ':', 0) + StringSeparator(TrackerID, ':', 1) + StringSeparator(TrackerID, ':', 2) + StringSeparator(TrackerID, ':', 3) +
-              StringSeparator(TrackerID, ':', 4) + StringSeparator(TrackerID, ':', 4) + StringSeparator(TrackerID, ':', 5);
   Serial.print("TrackerID: ");
   Serial.println(TrackerID);
   pinMode(LED, OUTPUT);
-
-  mesh.setDebugMsgTypes(ERROR | DEBUG); // set before init() so that you can see error messages
-
-  mesh.init(MESH_SSID, MESH_PASSWORD, &userScheduler, MESH_PORT);
-  mesh.onReceive(&receivedCallback);
-  mesh.onNewConnection(&newConnectionCallback);
-  mesh.onChangedConnections(&changedConnectionCallback);
-  mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
-  mesh.onNodeDelayReceived(&delayReceivedCallback);
-  mesh.setContainsRoot(true);
 
   userScheduler.addTask(taskSendMessage);
   taskSendMessage.enable();
@@ -75,8 +107,7 @@ void setup()
                        // This results in blinks between nodes being synced
                        blinkNoNodes.enableDelayed(BLINK_PERIOD -
                                                   (mesh.getNodeTime() % (BLINK_PERIOD * 1000)) / 1000);
-                     }
-                   });
+                     } });
   userScheduler.addTask(blinkNoNodes);
   blinkNoNodes.enable();
 
@@ -86,67 +117,12 @@ void setup()
 void loop()
 {
   mesh.update();
-  getWeights();
+
   digitalWrite(LED, !onFlag);
 }
-String getTemperature()
-{
-  float tempValue = 23.2;
 
-  return String(tempValue);
-}
-String getRSSI()
-{
-  return String(WiFi.RSSI());
-}
-float weights[16] = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0};
-
-void getWeights()
-{
-  //read weight sensors and upadate the global weights array
-  //add real sensor values here, this function is called at approximate of 1/10th of a sec
-  for (int i = 0; i < 15; i++)
-  {
-    weights[i] = (float)i;
-  }
-
-  //get sensor reading after every 1/10th of a second
-}
-String formatedWeights()
-{
-
-  String weightSamples = "";
-  for (int i = 0; i < 15; i++)
-  {
-    weightSamples += String(weights[i]) + String("^");
-  }
-
-  return weightSamples;
-}
 void sendMessage()
 {
-  String msgV;
-  healthTimer = healthTimer + 1;
-  if (healthTimer < 20)
-  {
-    String msg = "" + TrackerID + String(";");
-    msg += mesh.getNodeId();
-    msg += ";";
-    msg += String("w^") + formatedWeights();
-    msgV = msg;
-    mesh.sendBroadcast(msg); //after every 1.5 sec send the weight data
-  }
-  if (healthTimer > 20)
-  {
-    //after every 30 sec send temp and rssi data
-    healthTimer = 0;
-    String msg = "" + TrackerID + String(";");
-    msg += mesh.getNodeId();
-    msg += ";";
-    msg += String("h^") + getTemperature() + String("^") + getRSSI();
-    msgV = msg;
-    mesh.sendBroadcast(msg);
-  }
 
   if (calc_delay)
   {
@@ -158,18 +134,25 @@ void sendMessage()
     }
     calc_delay = false;
   }
-
-  Serial.printf("Sending message: %s\n", msgV.c_str());
-
+  meshManager.addSensor("time", String(millis()));
+  meshManager.send();
   taskSendMessage.setInterval(TASK_SECOND * 1.5); // between 1 and 5 seconds
 }
 
 void receivedCallback(uint32_t from, String &msg)
 {
-  Serial.printf("startHere: Received from %u msg=%s\n", from, msg.c_str());
-  String msgRec = msg;
-  //do whatever you want with the received msg here
-  //like resetting the nodes etc.
+  Serial.printf("Received from %u msg=%s\n", from, msg.c_str());
+  JsonDocument doc;
+  deserializeJson(doc, msg);
+  String macAddress = doc["macAddress"];
+  if (macAddress == WiFi.macAddress())
+  {
+    Serial.println("Received message.");
+  }
+  else if (macAddress == String("*"))
+  {
+    Serial.println("Received message; broadcasted to all nodes.");
+  }
 }
 
 void newConnectionCallback(uint32_t nodeId)
