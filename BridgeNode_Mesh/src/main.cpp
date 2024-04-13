@@ -15,10 +15,10 @@ void newConnectionCallback(uint32_t nodeId);
 void changedConnectionCallback();
 void nodeTimeAdjustedCallback(int32_t offset);
 void delayReceivedCallback(uint32_t from, int32_t delay);
+String serializeJsonToString(JsonObject obj);
 
 Scheduler userScheduler; // to control your personal task
 painlessMesh mesh;
-
 
 bool calc_delay = false;
 SimpleList<uint32_t> nodes;
@@ -35,21 +35,12 @@ class BridgeManager
 {
 public:
   static BridgeManager *instance;
-  std::map<String, std::pair<String, int>> nodes; // MAC, (SensorData, RSSI)
+  // std::map<String, std::pair<JsonObject, int>> nodes; // MAC, (SensorData JSON object, RSSI)
+  std::map<String, std::pair<String, int>> nodes; // MAC, (Serialized SensorData, RSSI)
+
   BridgeManager(painlessMesh &meshRef) : mesh(meshRef)
   {
-
-    mesh.setDebugMsgTypes(ERROR | DEBUG); // set before init() so that you can see error messages
-
-    mesh.init(MESH_SSID, MESH_PASSWORD, &userScheduler, MESH_PORT);
-    mesh.onReceive(receivedCallback);
-    mesh.onNewConnection(newConnectionCallback);
-    mesh.onChangedConnections(changedConnectionCallback);
-    mesh.onNodeTimeAdjusted(nodeTimeAdjustedCallback);
-    mesh.onNodeDelayReceived(delayReceivedCallback);
-    mesh.setContainsRoot(true);
   }
-
   void sendBroadcast(const String &message)
   {
     JsonDocument doc;
@@ -63,16 +54,43 @@ public:
   void sendDataToUART()
   {
     JsonDocument doc;
-    doc["nodeCount"] = nodes.size();
+    JsonArray nodeArray = doc.createNestedArray("nodes");
+
     for (auto &node : nodes)
     {
-      JsonArray nodeData = doc.createNestedArray(node.first);
-      nodeData.add(node.second.first);  // Sensor data
-      nodeData.add(node.second.second); // RSSI
+      JsonObject nodeObj = nodeArray.createNestedObject();
+      nodeObj["macAddress"] = node.first;
+      JsonDocument tempDoc;
+      deserializeJson(tempDoc, node.second.first); // Deserialize sensor data from string
+      nodeObj["data"] = tempDoc.as<JsonObject>();  // Set the data as JsonObject
+      nodeObj["rssi"] = node.second.second;
     }
     String jsonMessage;
     serializeJson(doc, jsonMessage);
     Serial.println(jsonMessage);
+  }
+
+  void printNodes()
+  {
+    JsonDocument doc;
+    if (nodes.empty())
+    {
+      Serial.println("No nodes currently available.");
+      return;
+    }
+    JsonArray array = doc.createNestedArray("nodes");
+
+    for (auto &node : nodes)
+    {
+      JsonObject nodeObj = array.createNestedObject();
+      nodeObj["macAddress"] = node.first;
+      JsonDocument tempDoc;
+      deserializeJson(tempDoc, node.second.first); // Deserialize from string
+      nodeObj["data"] = tempDoc.as<JsonObject>();
+      nodeObj["rssi"] = node.second.second;
+    }
+
+    serializeJsonPretty(doc, Serial);
   }
 
   int getNodeCount() const
@@ -80,18 +98,9 @@ public:
     return nodes.size();
   }
 
-  static void receivedCallback(uint32_t from, String &msg)
-  {
-    JsonDocument doc;
-    deserializeJson(doc, msg);
-    String mac = doc["macAddress"];
-    String data = doc["data"];
-    int rssi = doc["rssi"];
-    instance->nodes[mac] = {data, rssi};
-  }
-
 private:
   painlessMesh &mesh;
+  JsonDocument doc; // Single large document to use for various operations
 };
 
 BridgeManager *BridgeManager::instance = nullptr;
@@ -104,6 +113,15 @@ void setup()
   Serial.print("TrackerID: ");
   Serial.println(TrackerID);
   pinMode(LED, OUTPUT);
+  mesh.setDebugMsgTypes(ERROR | DEBUG); // set before init() so that you can see error messages
+
+  mesh.init(MESH_SSID, MESH_PASSWORD, &userScheduler, MESH_PORT);
+  mesh.onReceive(receivedCallback);
+  mesh.onNewConnection(newConnectionCallback);
+  mesh.onChangedConnections(changedConnectionCallback);
+  mesh.onNodeTimeAdjusted(nodeTimeAdjustedCallback);
+  mesh.onNodeDelayReceived(delayReceivedCallback);
+  mesh.setContainsRoot(true);
 
   userScheduler.addTask(taskSendMessage);
   taskSendMessage.enable();
@@ -138,6 +156,9 @@ void loop()
 {
   mesh.update();
   digitalWrite(LED, !onFlag);
+  
+  BridgeManager::instance->printNodes();
+  delay(2000);
 }
 
 void sendMessage()
@@ -153,13 +174,29 @@ void sendMessage()
 
 void receivedCallback(uint32_t from, String &msg)
 {
-
   JsonDocument doc;
-  deserializeJson(doc, msg);
-  String mac = doc["macAddress"];
-  String data = doc["data"];
+  DeserializationError error = deserializeJson(doc, msg);
+  if (error)
+  {
+    Serial.print("deserializeJson() failed: ");
+    Serial.println(error.c_str());
+    return;
+  }
+
+  String mac = doc["macAddress"].as<String>();
   int rssi = doc["rssi"];
-  BridgeManager::instance->nodes[mac] = {data, rssi};
+  String data;
+  serializeJson(doc["data"], data); // Serialize sensor data to string
+
+  // Store serialized JSON and RSSI in the map
+  BridgeManager::instance->nodes[mac] = std::make_pair(data, rssi);
+}
+
+String serializeJsonToString(JsonObject obj)
+{
+  String output;
+  serializeJson(obj, output);
+  return output;
 }
 
 void newConnectionCallback(uint32_t nodeId)
@@ -182,11 +219,11 @@ void changedConnectionCallback()
   blinkNoNodes.enableDelayed(BLINK_PERIOD - (mesh.getNodeTime() % (BLINK_PERIOD * 1000)) / 1000);
 
   nodes = mesh.getNodeList();
-  // Serial.printf("nodeslist:::");
-  // Serial.println(mesh.subConnectionJson());
+  Serial.printf("nodeslist:::");
+  Serial.println(mesh.subConnectionJson());
   // Serial.println("nodes handler id list");
 
-  // Serial.printf("Num nodes: %d\n", nodes.size());
+  Serial.printf("Num nodes: %d\n", nodes.size());
   // Serial.printf("Node pointer: %d\n", nH.getNodesPointer());
   // Serial.printf("Connection list:");
   String NodeRemoved = "";

@@ -38,14 +38,6 @@ class MeshManager
 public:
   MeshManager(painlessMesh &meshRef) : mesh(meshRef)
   {
-    mesh.setDebugMsgTypes(ERROR | DEBUG);
-    mesh.init(MESH_SSID, MESH_PASSWORD, &userScheduler, MESH_PORT);
-    mesh.onReceive(receivedCallback);
-    mesh.onNewConnection(&newConnectionCallback);
-    mesh.onChangedConnections(&changedConnectionCallback);
-    mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
-    mesh.onNodeDelayReceived(&delayReceivedCallback);
-    mesh.setContainsRoot(true);
   }
 
   void addSensor(const String &name, const String &value)
@@ -60,10 +52,12 @@ public:
 
     doc["macAddress"] = WiFi.macAddress();
     doc["rssi"] = WiFi.RSSI();
+    JsonObject dataObj = doc.createNestedObject("data");
     for (const auto &kv : sensorData)
     {
-      doc[kv.first] = kv.second;
+      dataObj[kv.first] = kv.second;
     }
+
     String msg;
     serializeJson(doc, msg);
     mesh.sendBroadcast(msg);
@@ -85,6 +79,15 @@ void setup()
   Serial.print("TrackerID: ");
   Serial.println(TrackerID);
   pinMode(LED, OUTPUT);
+
+  mesh.setDebugMsgTypes(ERROR | DEBUG);
+  mesh.init(MESH_SSID, MESH_PASSWORD, &userScheduler, MESH_PORT);
+  mesh.onReceive(receivedCallback);
+  mesh.onNewConnection(&newConnectionCallback);
+  mesh.onChangedConnections(&changedConnectionCallback);
+  mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
+  mesh.onNodeDelayReceived(&delayReceivedCallback);
+  mesh.setContainsRoot(true);
 
   userScheduler.addTask(taskSendMessage);
   taskSendMessage.enable();
@@ -135,6 +138,7 @@ void sendMessage()
     calc_delay = false;
   }
   meshManager.addSensor("time", String(millis()));
+  meshManager.addSensor("time_2", String(millis()+1));
   meshManager.send();
   taskSendMessage.setInterval(TASK_SECOND * 1.5); // between 1 and 5 seconds
 }
