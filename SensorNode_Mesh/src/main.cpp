@@ -5,6 +5,11 @@
 #include <ArduinoJson.h>
 #include <SensorManager.h>
 #include <bme280_handler.h>
+#include <inmp441_handler.h>
+#include <ens160_handler.h>
+#include <mq135_handler.h>
+#include <ldr_handler.h>
+#include <limit_switch_handler.h>
 
 #define LED 2 // GPIO number of connected LED, ON ESP-12 IS GPIO2
 
@@ -83,6 +88,10 @@ void setup()
   pinMode(LED, OUTPUT);
   SensorManager sensors;
   sensors.auto_setup("BME680", setup_bme280, 5, 1);
+  sensors.auto_setup("INMP441", setup_inmp441, 5, 1);
+  sensors.auto_setup("ENS160", setup_ens160, 5, 1);
+  sensors.auto_setup("LIMIT_SW", setup_limit_switch, 5, 1);
+  calibrate_ens160(get_temperature(), get_humidity());
 
   mesh.setDebugMsgTypes(ERROR | DEBUG);
   mesh.init(MESH_SSID, MESH_PASSWORD, &userScheduler, MESH_PORT);
@@ -124,6 +133,7 @@ void setup()
 void loop()
 {
   mesh.update();
+  loop_limit_switch();
 
   digitalWrite(LED, !onFlag);
 }
@@ -146,6 +156,15 @@ void sendMessage()
   meshManager.addSensor("humidity", String(get_humidity()));
   meshManager.addSensor("pressure", String(get_pressure()));
   meshManager.addSensor("altitude", String(get_altitude()));
+  meshManager.addSensor("noise_level", String(get_db()));
+  meshManager.addSensor("ens160_status", String(get_ens160_status()));
+  meshManager.addSensor("aqi", String(get_aqi()));
+  meshManager.addSensor("tvoc", String(get_tvoc()));
+  meshManager.addSensor("eco2", String(get_eco2()));
+  meshManager.addSensor("mq135_aqi", String(get_aqi_mq135()));
+  meshManager.addSensor("ldr", String(get_ldr()));
+  meshManager.addSensor("limit_sw", String(get_limit_sw_state()));
+  
   meshManager.send();
   taskSendMessage.setInterval(TASK_SECOND * 1.5); // between 1 and 5 seconds
 }
