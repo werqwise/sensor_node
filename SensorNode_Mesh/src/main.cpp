@@ -10,6 +10,7 @@
 #include <mq135_handler.h>
 #include <ldr_handler.h>
 #include <limit_switch_handler.h>
+#include <pir_handler.h>
 
 #define LED 2 // GPIO number of connected LED, ON ESP-12 IS GPIO2
 
@@ -91,6 +92,7 @@ void setup()
   sensors.auto_setup("INMP441", setup_inmp441, 5, 1);
   sensors.auto_setup("ENS160", setup_ens160, 5, 1);
   sensors.auto_setup("LIMIT_SW", setup_limit_switch, 5, 1);
+  sensors.auto_setup("PIR_SENSOR", setup_pir, 5, 1);
   calibrate_ens160(get_temperature(), get_humidity());
 
   mesh.setDebugMsgTypes(ERROR | DEBUG);
@@ -164,7 +166,8 @@ void sendMessage()
   meshManager.addSensor("mq135_aqi", String(get_aqi_mq135()));
   meshManager.addSensor("ldr", String(get_ldr()));
   meshManager.addSensor("limit_sw", String(get_limit_sw_state()));
-  
+  meshManager.addSensor("pir", String(get_pir()));
+
   meshManager.send();
   taskSendMessage.setInterval(TASK_SECOND * 1.5); // between 1 and 5 seconds
 }

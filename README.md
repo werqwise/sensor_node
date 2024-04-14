@@ -142,6 +142,7 @@ Other components pin connection details
 | :--- | :--- | 
 | `PIN1(C)` | `18` |
 | `PIN2(NO)` | `GND` |
+
 ![limsw](circuit/limsw.jpeg)
 
 #### ENS160
@@ -154,6 +155,7 @@ Other components pin connection details
 | `SDA` | `GPIO21` |
 | `GND` | `GND` |
 | `VIN` | `3V3` |
+
 ![ens160](circuit/ens160.png)
 
 #### BME280
@@ -166,6 +168,7 @@ Other components pin connection details
 | `SDA` | `GPIO21` |
 | `GND` | `GND` |
 | `VIN` | `3V3` |
+
 ![bme280](circuit/bme280.jpeg)
 
 #### Mini PIR
@@ -176,7 +179,8 @@ Other components pin connection details
 | :--- | :--- | 
 | `+` | `3v3` |
 | `GND` | `GND` |
-| `DO` | `` |
+| `DO` | `GPIO39` |
+
 ![MINIpir](circuit/minipir.jpeg)
 
 #### LDR
@@ -188,6 +192,7 @@ Other components pin connection details
 | `+` | `3v3` |
 | `GND` | `GND` |
 | `DO` | `GPIO34` |
+
 ![ldr](circuit/ldrmod.png)
 
 #### INMP441
@@ -202,6 +207,7 @@ Other components pin connection details
 | `WS` | `GPIO25` |
 | `SCK` | `GPIO32` |
 | `SD` | `GPIO33` |
+
 ![ldr](circuit/inmp441.jpeg)
 
 ## 🔧 Mesh Architecture <a name = "circuit"></a>
