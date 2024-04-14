@@ -1,4 +1,5 @@
-#define LIGHT_SENSOR_PIN 34 // ESP32 pin GIOP36 (ADC0)
+
+#define LIGHT_SENSOR_PIN 34 // ESP32 pin GIOP34 (ADC0)
 
 int get_ldr() //less value; brighter light
 {
