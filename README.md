@@ -270,9 +270,13 @@ Following components are used to make this project
 - [Python](https://www.python.org/) - Programming Language
 
 ## Demo Video
-```diff
-+ For future use
-```
+
+- [Sensor Node/Bridge Node Firmware](https://youtu.be/JaxaSnypMZQ)
+
+## Test Performed
+- List of tests performed from development perspective.
+  - Hardware Assembly(INMP441, Limit Switch, ESP32, LDR, ENS160, BME280)
+  - Sensor Node and Bridge Node Firmware test(two sensor nodes and one bridge node)
 
 ## ✍️ Authors <a name = "authors"></a>
 
