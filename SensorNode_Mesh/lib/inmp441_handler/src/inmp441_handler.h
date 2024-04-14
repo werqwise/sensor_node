@@ -63,6 +63,6 @@ float get_db()
     float rms = calculateRMS(raw_samples, samples_read);
     float spl = calculateSPL(rms, 0.00002); // Reference pressure 20 µPa
 
-    // Serial.printf("RMS: %f, SPL: %f dB\n", rms, spl);
+    Serial.printf("RMS: %f, SPL: %f dB\n", rms, spl);
     return spl;
 }

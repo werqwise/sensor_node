@@ -1,12 +1,12 @@
 #include <Wire.h>
-#include <SPI.h>
+// #include <SPI.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 
-#define BME_SCK 13
-#define BME_MISO 12
-#define BME_MOSI 11
-#define BME_CS 10
+// #define BME_SCK 13
+// #define BME_MISO 12
+// #define BME_MOSI 11
+// #define BME_CS 10
 
 #define SEALEVELPRESSURE_HPA (1013.25)
 
@@ -22,7 +22,7 @@ int setup_bme280()
     unsigned status;
 
     // default settings
-    status = bme.begin();
+    status = bme.begin(0x76);
     // You can also pass in a Wire library object like &Wire2
     // status = bme.begin(0x76, &Wire2)
     if (!status)

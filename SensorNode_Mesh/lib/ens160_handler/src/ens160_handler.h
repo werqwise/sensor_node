@@ -1,3 +1,5 @@
+#define I2C_COMMUNICATION
+
 #include <DFRobot_ENS160.h>
 
 DFRobot_ENS160_I2C ENS160(&Wire, /*i2cAddr*/ 0x53);
@@ -42,15 +44,18 @@ uint8_t get_ens160_status()
 
 uint8_t get_aqi()
 {
+    get_ens160_status();
     return ENS160.getAQI();
 }
 
 uint16_t get_tvoc()
 {
+    get_ens160_status();
     return ENS160.getTVOC();
 }
 uint8_t get_eco2()
 {
+    get_ens160_status();
     return ENS160.getECO2();
 }
 // void loop()
