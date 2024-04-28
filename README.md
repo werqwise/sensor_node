@@ -199,6 +199,10 @@ High level architecture of the Mesh network
 3.  Connect Bridge Node to any USB port of the Raspberry Pi and then run the Firmware.
 4.  There could be unlimited number of sensor nodes in the mesh network.
 
+
+## How to Flash Firmware Binary using esptool
+[Video](https://youtu.be/PEvJFrWCtIc) for flashing firmware binary using esptool
+
 ## Web App <a name="webapp"></a>
 ```diff
 + For future use
