@@ -108,25 +108,15 @@ To make the firmware ready for the Raspberry Pi
 3.  While line number 75 listens to the Acknowledgement messages from the Bridge Node.
 
 ## Circuit <a name = "circuit"></a>
+![Circuit Schematics](circuit/circuit_bb.png)
 
-```diff
-! Work in progress
-```
 
 ### ESP32 Dev Module Pinout
 
 
-Follow the pinout diagram given below to connect different components to your TTGO LORA32 board.
+Follow the pinout diagram given below to connect different components to your WEMOS D1 mini.
 
 ![LoraPinout](circuit/wemos.png)
-
-
-
-### Circuit Diagram for Smart Joystick
-
-Here's the complete circuit diagram of the system.
-
-![CircuitDiagram](Circuit/Circuit_bb.png)
 
 ### Components Connections
 
