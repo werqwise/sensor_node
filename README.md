@@ -69,23 +69,9 @@ You should have Platform.io installed with the following pre-reqs
 
 Everything is already configured for Sensor Nodes Firmware and can be uploaded to the respective nodes for testing.
 
-  1.  On line number 114 of MN_SensorNode(main.cpp) there is a function named `receivedCallback`. Whenever a data is being received by the Python script from MQTT, it is send to the Bridge Node and the Bridge Node broadcasts it to all the nodes in the mesh network. `receivedCallback` function is where the data is being received and msgRec is the final String varible which stores the received message which can be parsed and used for functionalities like node reset etc.
-  2.  `sendMessage` on line number 90 of MN_SensorNode(main.cpp) is the function which is being called after every 1 second and broadcasts the node data to all the nodes in the network. Line number 95 contains a variable named msg which can be appended with any type of data like load sensors or temperature sensors in your case.
-      1.  The final format of broadcasted message is in this format
-        ```ESP32MAC Address;MeshNode ID;Any String Data ```
-
 #### Bridge Node
 
 Everything is already configured for the Bridge Node Firmware as well and can be uploaded to the respective node for testing.
- 
-  1.  On line number 91 of MN_BridgeNode there is a function `sendMessage`, which:
-      1.  Sends the received data to the Raspberry Pi after every 0.5 seconds
-      2.  Checks if there is an incomming data from the Raspberry Pi then:
-          1.  Parses it
-          2.  Broadcasts it to all the nodes in the mesh network
-          3.  Sends ack message back to the Raspberry Pi
-  2.  On line number 110 there is a function named `receivedCallback` which receives the data from all the nodes in the netowrk, parses it and then stores it in a custom-built data structure named `NodesHandler` which is in `nodesHandler.h` file.
-  3.  Don't remove any Serial.print statement from Bridge Node firmware as it is used to communicate with the Raspberry Pi over USB Serial connection.
 
 #### Gateway Node(Raspberry Pi)
 
