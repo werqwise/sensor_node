@@ -80,18 +80,9 @@ To make the firmware ready for the Raspberry Pi
 1.  Open the terminal and execute the following commands
     1.  sudo apt update
     2.  sudo apt upgrade
-    3.  sudo pip3 install AWSIoTPythonSDK
     4.  sudo pip3 install --user pyserial
-2. Then put the certificate files in certs folder and do the required changes in `mqttConfigs.py` file.
-    1.  Copy PythonFirmware folder to your Raspberry Pis Desktop and run it using the following command
+2.  Run it using the following command
         ```python3 /Desktop/PythonFirmware/pyFirmware.py ```
-
-##### Details
-
-1.  The function named `broadcastDataToMesh` on line number 42 of `pyFirmware.py` file can be called anywhere to broadcast data to all the nodes in the network. For demo it is being called after every 30 seconds with temp data.
-    1.  Always call the `broadcastDataToMesh` function in this format ```B:your Data```. 
-2.  Line number 58 checks whether there's any incomming data and it contains any node information, if yes, it parses it within its block and publishes it to the MQTT broker.
-3.  While line number 75 listens to the Acknowledgement messages from the Bridge Node.
 
 ## Circuit <a name = "circuit"></a>
 ![Circuit Schematics](circuit/circuit_bb.png)
