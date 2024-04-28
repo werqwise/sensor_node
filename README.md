@@ -201,8 +201,12 @@ High level architecture of the Mesh network
 
 
 ## How to Flash Firmware Binary using esptool
-[Video](https://youtu.be/PEvJFrWCtIc) for flashing firmware binary using esptool
+[Video](https://youtu.be/PEvJFrWCtIc) for flashing firmware binary using esptool.
 
+Sample Command for flashing esp32 using esptool:
+```diff
+esptool -p COM7 -b 460800 --before default_reset --after hard_reset --chip esp32  write_flash --flash_mode dio --flash_size 2MB --flash_freq 40m 0x10000 .\deep_sleep.bin
+```
 ## Web App <a name="webapp"></a>
 ```diff
 + For future use
