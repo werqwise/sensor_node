@@ -92,9 +92,11 @@ void setup()
   sensors.auto_setup("INMP441", setup_inmp441, 5, 1);
   sensors.auto_setup("ENS160", setup_ens160, 5, 1);
   sensors.auto_setup("LIMIT_SW", setup_limit_switch, 5, 1);
-  sensors.auto_setup("PIR_SENSOR", setup_pir, 5, 1);
-  calibrate_ens160(get_temperature(), get_humidity());
-
+  // sensors.auto_setup("PIR_SENSOR", setup_pir, 5, 1);
+  if (get_ens160_connection_status())
+  {
+    calibrate_ens160(get_temperature(), get_humidity());
+  }
   mesh.setDebugMsgTypes(ERROR | DEBUG);
   mesh.init(MESH_SSID, MESH_PASSWORD, &userScheduler, MESH_PORT);
   mesh.onReceive(receivedCallback);
@@ -159,10 +161,13 @@ void sendMessage()
   meshManager.addSensor("pressure", String(get_pressure()));
   meshManager.addSensor("altitude", String(get_altitude()));
   meshManager.addSensor("noise_level", String(get_db()));
-  meshManager.addSensor("ens160_status", String(get_ens160_status()));
-  meshManager.addSensor("aqi", String(get_aqi()));
-  meshManager.addSensor("tvoc", String(get_tvoc()));
-  meshManager.addSensor("eco2", String(get_eco2()));
+  if (get_ens160_connection_status())
+  {
+    meshManager.addSensor("ens160_status", String(get_ens160_status()));
+    meshManager.addSensor("aqi", String(get_aqi()));
+    meshManager.addSensor("tvoc", String(get_tvoc()));
+    meshManager.addSensor("eco2", String(get_eco2()));
+  }
   meshManager.addSensor("mq135_aqi", String(get_aqi_mq135()));
   meshManager.addSensor("ldr", String(get_ldr()));
   meshManager.addSensor("limit_sw", String(get_limit_sw_state()));

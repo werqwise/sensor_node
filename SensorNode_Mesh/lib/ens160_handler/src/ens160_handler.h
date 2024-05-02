@@ -3,6 +3,11 @@
 #include <DFRobot_ENS160.h>
 
 DFRobot_ENS160_I2C ENS160(&Wire, /*i2cAddr*/ 0x53);
+int ens160_conn_status = 0;
+int get_ens160_connection_status()
+{
+    return ens160_conn_status;
+}
 
 int setup_ens160()
 {
@@ -11,6 +16,7 @@ int setup_ens160()
     if (NO_ERR != ENS160.begin())
     {
         Serial.println("Communication with device failed, please check connection");
+        ens160_conn_status = 0;
         return 0;
     }
 
@@ -28,7 +34,7 @@ int setup_ens160()
      * ambientTemp Compensate the current ambient temperature, float type, unit: C
      * relativeHumidity Compensate the current ambient temperature, float type, unit: %rH
      */
-
+    ens160_conn_status = 1;
     return 1;
 }
 
