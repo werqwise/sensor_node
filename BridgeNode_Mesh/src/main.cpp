@@ -75,11 +75,12 @@ public:
     JsonDocument doc;
     if (nodes.empty())
     {
-      Serial.println("No nodes currently available.");
+      Serial.println("{}");
       return;
     }
     JsonArray array = doc.createNestedArray("nodes");
-
+    
+    doc["bridge_mac"] = String(WiFi.macAddress());
     for (auto &node : nodes)
     {
       JsonObject nodeObj = array.createNestedObject();
@@ -88,9 +89,10 @@ public:
       deserializeJson(tempDoc, node.second.first); // Deserialize from string
       nodeObj["data"] = tempDoc.as<JsonObject>();
       nodeObj["rssi"] = node.second.second;
+      
     }
 
-    serializeJsonPretty(doc, Serial);
+    serializeJson(doc, Serial);
   }
 
   int getNodeCount() const
@@ -110,8 +112,8 @@ void setup()
   Serial.begin(115200);
   TrackerID = String(WiFi.macAddress());
 
-  Serial.print("TrackerID: ");
-  Serial.println(TrackerID);
+  // Serial.print("TrackerID: ");
+  // Serial.println(TrackerID);
   pinMode(LED, OUTPUT);
   mesh.setDebugMsgTypes(ERROR | DEBUG); // set before init() so that you can see error messages
 
@@ -212,18 +214,18 @@ void newConnectionCallback(uint32_t nodeId)
 
 void changedConnectionCallback()
 {
-  Serial.printf("Changed connections\n");
+  // Serial.printf("Changed connections\n");
   // Reset blink task
   onFlag = false;
   blinkNoNodes.setIterations((mesh.getNodeList().size() + 1) * 2);
   blinkNoNodes.enableDelayed(BLINK_PERIOD - (mesh.getNodeTime() % (BLINK_PERIOD * 1000)) / 1000);
 
   nodes = mesh.getNodeList();
-  Serial.printf("nodeslist:::");
-  Serial.println(mesh.subConnectionJson());
+  // Serial.printf("nodeslist:::");
+  // Serial.println(mesh.subConnectionJson());
   // Serial.println("nodes handler id list");
 
-  Serial.printf("Num nodes: %d\n", nodes.size());
+  // Serial.printf("Num nodes: %d\n", nodes.size());
   // Serial.printf("Node pointer: %d\n", nH.getNodesPointer());
   // Serial.printf("Connection list:");
   String NodeRemoved = "";
@@ -231,7 +233,7 @@ void changedConnectionCallback()
   // nH.printAll();
   while (node != nodes.end())
   {
-    Serial.printf(" %u", *node);
+    // Serial.printf(" %u", *node);
 
     node++;
   }
