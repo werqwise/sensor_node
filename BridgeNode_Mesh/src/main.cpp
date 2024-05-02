@@ -55,21 +55,26 @@ public:
   {
     JsonDocument doc;
     JsonArray nodeArray = doc.createNestedArray("nodes");
-
-    for (auto &node : nodes)
+    if (nodes.empty())
     {
-      JsonObject nodeObj = nodeArray.createNestedObject();
-      nodeObj["macAddress"] = node.first;
-      JsonDocument tempDoc;
-      deserializeJson(tempDoc, node.second.first); // Deserialize sensor data from string
-      nodeObj["data"] = tempDoc.as<JsonObject>();  // Set the data as JsonObject
-      nodeObj["rssi"] = node.second.second;
+      Serial.println("{}");
     }
-    String jsonMessage;
-    serializeJson(doc, jsonMessage);
-    Serial.println(jsonMessage);
+    else
+    {
+      for (auto &node : nodes)
+      {
+        JsonObject nodeObj = nodeArray.createNestedObject();
+        nodeObj["macAddress"] = node.first;
+        JsonDocument tempDoc;
+        deserializeJson(tempDoc, node.second.first); // Deserialize sensor data from string
+        nodeObj["data"] = tempDoc.as<JsonObject>();  // Set the data as JsonObject
+        nodeObj["rssi"] = node.second.second;
+      }
+      String jsonMessage;
+      serializeJson(doc, jsonMessage);
+      Serial.println(jsonMessage);
+    }
   }
-
   void printNodes()
   {
     JsonDocument doc;
@@ -79,8 +84,8 @@ public:
       return;
     }
     JsonArray array = doc.createNestedArray("nodes");
-    
-    doc["bridge_mac"] = String(WiFi.macAddress());
+
+    doc["bridge_mac"] = TrackerID;
     for (auto &node : nodes)
     {
       JsonObject nodeObj = array.createNestedObject();
@@ -89,10 +94,12 @@ public:
       deserializeJson(tempDoc, node.second.first); // Deserialize from string
       nodeObj["data"] = tempDoc.as<JsonObject>();
       nodeObj["rssi"] = node.second.second;
-      
     }
 
-    serializeJson(doc, Serial);
+    // serializeJson(doc, Serial);
+    String jsonMessage;
+    serializeJson(doc, jsonMessage);
+    Serial.println(jsonMessage);
   }
 
   int getNodeCount() const
@@ -112,7 +119,7 @@ void setup()
   Serial.begin(115200);
   TrackerID = String(WiFi.macAddress());
 
-  // Serial.print("TrackerID: ");
+  // Serial.print("TrackerID: ");x
   // Serial.println(TrackerID);
   pinMode(LED, OUTPUT);
   mesh.setDebugMsgTypes(ERROR | DEBUG); // set before init() so that you can see error messages
@@ -158,8 +165,9 @@ void loop()
 {
   mesh.update();
   digitalWrite(LED, !onFlag);
-  
+
   BridgeManager::instance->printNodes();
+  // BridgeManager::instance->sendDataToUART();
   delay(2000);
 }
 
