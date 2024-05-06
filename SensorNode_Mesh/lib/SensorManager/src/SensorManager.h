@@ -11,7 +11,6 @@ public:
     // Method to setup sensors with retries
     void auto_setup(const String& sensorName, std::function<bool()> setupFunction, int maxAttempts, int delaySeconds) {
         bool setupSuccess = false;
-
         for (int attempt = 1; attempt <= maxAttempts; ++attempt) {
             if (setupFunction()) {
                 setupSuccess = true;
