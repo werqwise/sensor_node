@@ -8,7 +8,7 @@ PirSensor motion = PirSensor(MOTION_SENSOR_PIN, 2, false, false);
 
 int setup_pir()
 {
-    motion.begin();
+    return motion.begin();
     return 1;
 }
 
@@ -18,5 +18,8 @@ int get_pir()
     if (motionStateChange >= 0)
     {
         return motionStateChange;
+    }
+    else{
+        return 0;
     }
 }

@@ -92,7 +92,7 @@ void setup()
   sensors.auto_setup("INMP441", setup_inmp441, 5, 1);
   sensors.auto_setup("ENS160", setup_ens160, 5, 1);
   sensors.auto_setup("LIMIT_SW", setup_limit_switch, 5, 1);
-  // sensors.auto_setup("PIR_SENSOR", setup_pir, 5, 1);
+  sensors.auto_setup("PIR_SENSOR", setup_pir, 5, 1);
   if (get_ens160_connection_status())
   {
     calibrate_ens160(get_temperature(), get_humidity());
