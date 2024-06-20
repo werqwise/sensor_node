@@ -53,26 +53,26 @@ What things you need to install the software and how to install them.
 A step by step series that tell you how to get the Firmware and Backend running
 
 #### One-click Installation
-A step by step series that tell you how to get the Firmware and Backend running
+
 ## Driver Installation
 1. Connect the ESP32 to the Computer USB Port.
-2. Extract the esp32_flasher.zip
-3. In Windows Search, search Device Manager and open it. Scroll down to Ports.
+2. In Windows Search, search Device Manager and open it. Scroll down to Ports.
 ![PORTS](./artwork/2.png)
  - If the drivers are not installed you will see the CP2102 USB to UART Bridge Controller.
  - If the Drivers are Installed You will See the Following in the Ports.
  ![PORTS](./artwork/image.png)
  - Here the Port is COM7 for the ESP32.
-4. To Install the Drivers Right Click on the `CP2102 USB to UART Bridge Controller` and then click on the `Update Driver / Install Driver`.
-5. Click on `Browse my Computer from Drivers` for Drivers Installation.
+1. To Install the Drivers Right Click on the `CP2102 USB to UART Bridge Controller` and then click on the `Update Driver / Install Driver`.
+2. Click on `Browse my Computer from Drivers` for Drivers Installation.
 ![Driver Installation](./artwork/3.png)
-6. Select the `CP2102x_VCP_Windows` folder in the ESP32_Flasher folder to which the esp32_flasher.zip is extracted.
+1. Select the `CP2102x_VCP_Windows` folder in the ESP32_Flasher folder to which the esp32_flasher.zip is extracted.
 ![Driver Selection](./artwork/4.png)
-7. Click on `Next` and the drivers will be installed in some time. On Successful Installtion you will see the following message.
+1. Click on `Next` and the drivers will be installed in some time. On Successful Installtion you will see the following message.
 ![Installation Successful](./artwork//5.png)
+
 #### Uploading Firmware to ESP32
 1. Connect ESP32 to Computer USB Port.
-2. Go to the `release` folder, and then to `ESP_Flasher`.
+2. Go to the `ESP_Flasher` folder.
 3. Double Click on `ESP_Flasher.exe`.
 4. You will see the following Window.                                      
 ![Flasher First](./artwork/flasher_1.png)
@@ -86,18 +86,23 @@ A step by step series that tell you how to get the Firmware and Backend running
 7. Now in the ESP_Flasher tool Click on the `Browse Button` in front of Select Firmware (.bin).
 ![Flasher Second](./artwork/flasher_2.png)
  - This will open a window for Selecting the `.bin` file of the firmware.
-8. In `release` folder open the `binaries` folder.
+
+8. Open `release` folder of `BridgeNode_Mesh`.
 ![Binaries](./artwork/binaries.png)
- - Here you will find files with `.bin` extension. These are the firmware files with the version mentioned in its name. 
+ - Here you will find files with `.bin` extension. 
  - Select this file and Click on Open.
  ![Binaries-2](./artwork/binaries_2.png)
-9. You will now see the path of the firmware .bin file in the text field.                 
+9. You will now see the path of the `firmware .bin` file in the text field.                 
 ![Flasher three](./artwork/flasher_3.png)
-10. Now Click on the `Flash ESP32` Button.                                
+10.  Now Click on the `Flash ESP32` Button.                                
 ![Flasher four](./artwork/flasher_4.png)      
-11. It will take some time and when the ESP32 is flashed successfully you will see the Message `Firmware flashed successfully!`.
+11.  It will take some time and when the ESP32 is flashed successfully you will see the Message `Firmware flashed successfully!`. 
 ![Flasher five](./artwork/flasher_5.png) 
+```diff
++ Please note that the flasher might not respond for a few minutes and that is okay, it will eventually flash. 
+```
 
+12. Follow the same steps(7-11) for `SensorNode_Mesh`
 
 #### Sensor Nodes
 
