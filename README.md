@@ -53,17 +53,50 @@ What things you need to install the software and how to install them.
 A step by step series that tell you how to get the Firmware and Backend running
 
 #### One-click Installation
+A step by step series that tell you how to get the Firmware and Backend running
+## Driver Installation
+1. Connect the ESP32 to the Computer USB Port.
+2. In Windows Search, search Device Manager and open it. Scroll down to Ports.
+![PORTS](./artwork/2.png)
+ - If the drivers are not installed you will see the CP2102 USB to UART Bridge Controller.
+ - If the Drivers are Installed You will See the Following in the Ports.
+ ![PORTS](./artwork/image.png)
+ - Here the Port is COM7 for the ESP32.
+3. To Install the Drivers Right Click on the `CP2102 USB to UART Bridge Controller` and then click on the `Update Driver / Install Driver`.
+4. Click on `Browse my Computer from Drivers` for Drivers Installation.
+![Driver Installation](./artwork/3.png)
+5. Select the `CP2102x_VCP_Windows` folder in the ESP32_Flasher folder in release folder.
+![Driver Selection](./artwork/4.png)
+6. Click on `Next` and the drivers will be installed in some time. On Successful Installtion you will see the following message.
+![Installation Successful](./artwork//5.png)
+#### Uploading Firmware to ESP32
+1. Connect ESP32 to Computer USB Port.
+2. Go to the `release` folder, and then to `ESP_Flasher`.
+3. Double Click on `ESP_Flasher.exe`.
+4. You will see the following Window.                                      
+![Flasher First](./artwork/flasher_1.png)
+ - If ESP32 is connected you will see the ESP32 Connected Message.
+5. In Windows Search, search Device Manager and open it. Scroll down to Ports.
+ - Here you see the `Silicon Labs CP210x USB to UART Bridge (COM7)`, it means ESP32 is connected to `COM7`.
+![Ports](./artwork/ports.png)
 
-```diff
-! Work in progress
-```
+6. Now Select the Port on which ESP32 is Connected from the Drop Down Menu.
+![Flasher Port](./artwork/flasher_port.png)
+7. Now in the ESP_Flasher tool Click on the `Browse Button` in front of Select Firmware (.bin).
+![Flasher Second](./artwork/flasher_2.png)
+ - This will open a window for Selecting the `.bin` file of the firmware.
+8. In `release` folder open the `binaries` folder.
+![Binaries](./artwork/binaries.png)
+ - Here you will find files with `.bin` extension. These are the firmware files with the version mentioned in its name. 
+ - Select this file and Click on Open.
+ ![Binaries-2](./artwork/binaries_2.png)
+9. You will now see the path of the firmware .bin file in the text field.                 
+![Flasher three](./artwork/flasher_3.png)
+10. Now Click on the `Flash ESP32` Button.                                
+![Flasher four](./artwork/flasher_4.png)      
+11. It will take some time and when the ESP32 is flashed successfully you will see the Message `Firmware flashed successfully!`.
+![Flasher five](./artwork/flasher_5.png) 
 
-#### Platform.io Configs
-
-You should have Platform.io installed with the following pre-reqs
-
-  1.  ESP32 Board should be installed in Platform.io
-    
 
 #### Sensor Nodes
 
@@ -73,16 +106,6 @@ Everything is already configured for Sensor Nodes Firmware and can be uploaded t
 
 Everything is already configured for the Bridge Node Firmware as well and can be uploaded to the respective node for testing.
 
-#### Gateway Node(Raspberry Pi)
-
-To make the firmware ready for the Raspberry Pi
-
-1.  Open the terminal and execute the following commands
-    1.  sudo apt update
-    2.  sudo apt upgrade
-    4.  sudo pip3 install --user pyserial
-2.  Run it using the following command
-        ```python3 /Desktop/PythonFirmware/pyFirmware.py ```
 
 ## Circuit <a name = "circuit"></a>
 ![Circuit Schematics](circuit/circuit_bb.png)
@@ -191,13 +214,6 @@ High level architecture of the Mesh network
 4.  There could be unlimited number of sensor nodes in the mesh network.
 
 
-## How to Flash Firmware Binary using esptool
-[Video](https://youtu.be/PEvJFrWCtIc) for flashing firmware binary using esptool.
-
-Sample Command for flashing esp32 using esptool:
-```diff
-esptool -p COM7 -b 460800 --before default_reset --after hard_reset --chip esp32  write_flash --flash_mode dio --flash_size 2MB --flash_freq 40m 0x10000 .\deep_sleep.bin
-```
 ## Web App <a name="webapp"></a>
 ```diff
 + For future use
