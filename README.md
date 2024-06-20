@@ -56,18 +56,19 @@ A step by step series that tell you how to get the Firmware and Backend running
 A step by step series that tell you how to get the Firmware and Backend running
 ## Driver Installation
 1. Connect the ESP32 to the Computer USB Port.
-2. In Windows Search, search Device Manager and open it. Scroll down to Ports.
+2. Extract the esp32_flasher.zip
+3. In Windows Search, search Device Manager and open it. Scroll down to Ports.
 ![PORTS](./artwork/2.png)
  - If the drivers are not installed you will see the CP2102 USB to UART Bridge Controller.
  - If the Drivers are Installed You will See the Following in the Ports.
  ![PORTS](./artwork/image.png)
  - Here the Port is COM7 for the ESP32.
-3. To Install the Drivers Right Click on the `CP2102 USB to UART Bridge Controller` and then click on the `Update Driver / Install Driver`.
-4. Click on `Browse my Computer from Drivers` for Drivers Installation.
+4. To Install the Drivers Right Click on the `CP2102 USB to UART Bridge Controller` and then click on the `Update Driver / Install Driver`.
+5. Click on `Browse my Computer from Drivers` for Drivers Installation.
 ![Driver Installation](./artwork/3.png)
-5. Select the `CP2102x_VCP_Windows` folder in the ESP32_Flasher folder in release folder.
+6. Select the `CP2102x_VCP_Windows` folder in the ESP32_Flasher folder to which the esp32_flasher.zip is extracted.
 ![Driver Selection](./artwork/4.png)
-6. Click on `Next` and the drivers will be installed in some time. On Successful Installtion you will see the following message.
+7. Click on `Next` and the drivers will be installed in some time. On Successful Installtion you will see the following message.
 ![Installation Successful](./artwork//5.png)
 #### Uploading Firmware to ESP32
 1. Connect ESP32 to Computer USB Port.
