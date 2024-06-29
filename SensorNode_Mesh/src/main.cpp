@@ -29,6 +29,7 @@ static bool eth_connected = false;
 #define BLINK_PERIOD 3000  // milliseconds until cycle repeat
 #define BLINK_DURATION 100 // milliseconds LED is on for
 
+const char *device_type = "POE";
 // MQTT Configurations
 const char* mqtt_server = "mqtt.iot.werqwall.com";
 const int mqtt_port = 1883;
@@ -88,6 +89,7 @@ void setupMQTT() {
 
 void sendMQTTMessage() {
   StaticJsonDocument<200> jsonDoc;
+  jsonDoc["type"] = device_type;  
   jsonDoc["time"] = millis();
   jsonDoc["temperature"] = get_temperature();
   jsonDoc["humidity"] = get_humidity();
