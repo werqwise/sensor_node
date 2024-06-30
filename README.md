@@ -120,9 +120,9 @@ Everything is already configured for the Bridge Node Firmware as well and can be
 ### ESP32 Dev Module Pinout
 
 
-Follow the pinout diagram given below to connect different components to your WEMOS D1 mini.
+Follow the pinout diagram given below to connect different components to your ESP32-POE.
 
-![LoraPinout](circuit/wemos.png)
+![LoraPinout](circuit/ESP32-POE-GPIO.png)
 
 ### Components Connections
 
