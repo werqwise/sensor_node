@@ -12,18 +12,11 @@
 #include <limit_switch_handler.h>
 #include <pir_handler.h>
 #include <ETH.h>
+#include <WiFi.h>
 #include <PubSubClient.h>
 #include "SStack.h"
 #include <TaskScheduler.h> // Include TaskScheduler library
-// Ethernet Configurations
-#ifndef ETH_PHY_TYPE
-#define ETH_PHY_TYPE ETH_PHY_LAN8720
-#define ETH_PHY_ADDR 0
-#define ETH_PHY_MDC 23
-#define ETH_PHY_MDIO 18
-#define ETH_PHY_POWER -1
-#define ETH_CLK_MODE ETH_CLOCK_GPIO0_IN
-#endif
+
 static bool eth_connected = false;
 #define LED 2 // GPIO number of connected LED, ON ESP-12 IS GPIO2
 
@@ -89,6 +82,10 @@ String TrackerID = "";
 float healthTimer = 0;
 WiFiClient ethClient;
 PubSubClient client(ethClient);
+
+
+InterceptSerial CustomSerial(Serial, client);
+
 void setupMQTT()
 {
   client.setServer(mqtt_server, mqtt_port);
@@ -98,7 +95,7 @@ void sendMQTTMessage()
 {
   StaticJsonDocument<200> jsonDoc;
   jsonDoc["type"] = device_type;
-  jsonDoc["time"] = millis();
+  jsonDoc["time"] = get_timestamp();
   jsonDoc["temperature"] = get_temperature();
   jsonDoc["humidity"] = get_humidity();
   jsonDoc["pressure"] = get_pressure();
@@ -115,7 +112,6 @@ void sendMQTTMessage()
   jsonDoc["ldr"] = get_ldr();
   jsonDoc["limit_sw"] = get_limit_sw_state();
   jsonDoc["pir"] = get_pir();
-  jsonDoc["heartbeat"] = get_timestamp();
 
   char buffer[512];
   serializeJson(jsonDoc, buffer);
@@ -162,10 +158,10 @@ void setup()
   {
     calibrate_ens160(get_temperature(), get_humidity());
   }
-  userScheduler.addTask(taskSendMessage);
-  taskSendMessage.enable();
+
   WiFi.onEvent(onEvent);
   ETH.begin();
+  delay(100);
 
   // Initialize ADC
   analogReadResolution(12); // Optional: Set ADC resolution (default is 12 bits)
@@ -174,6 +170,12 @@ void setup()
   randomSeed(analogRead(34)); // Using GPIO 34 (ADC1 Channel 6) as an example
 
   Serial.println("Random Seed initialized.");
+  setupMQTT();
+  connectMQTT();
+  delay(100);
+  sendMQTTMessage();
+  userScheduler.addTask(taskSendMessage);
+  taskSendMessage.enable();
 }
 
 void loop()
@@ -186,8 +188,8 @@ void loop()
   {
     delay(100);
   }
-  setupMQTT();
-  connectMQTT();
+  client.loop(); // Ensure the MQTT client is looped
+  userScheduler.execute(); // Run the scheduler
 }
 
 void sendMessage()

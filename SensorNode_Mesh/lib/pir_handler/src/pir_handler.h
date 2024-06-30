@@ -1,5 +1,4 @@
 #include <Arduino.h>
-// #include <PirSensor.h>
 #ifndef PIR_SENSOR_H
 #define PIR_SENSOR_H
 
@@ -25,7 +24,6 @@ public:
 #endif // PIR_SENSOR_H
 
 // Implementation of PirSensor class
-#include <PirSensor.h>
 #include <Math.h>
 
 PirSensor::PirSensor(uint8_t sensorPin, int samplesCount, bool debugSetting, bool verboseSetting)
