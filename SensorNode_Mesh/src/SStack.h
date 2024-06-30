@@ -34,6 +34,11 @@ String randomString(String appendV)
     v = v + String(letters[randomValue]);
   }
   v = v + appendV;
-  //Serial.println(v);
+  // Serial.println(v);
   return v;
+}
+
+String get_timestamp()
+{
+  return String(millis());
 }
