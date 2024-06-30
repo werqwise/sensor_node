@@ -32,7 +32,9 @@ const char *mqtt_password = "mqtt_client";
 String mqtt_topic;
 // Prototypes
 void sendMessage();
+int connectMQTT();
 void getWeights();
+void printMQTTMessage();
 void receivedCallback(uint32_t from, String &msg);
 void newConnectionCallback(uint32_t nodeId);
 void changedConnectionCallback();
@@ -45,6 +47,7 @@ bool calc_delay = false;
 
 Task taskSendMessage(TASK_SECOND * 1.5, TASK_FOREVER, &sendMessage); // start with a one second interval
 // WARNING: onEvent is called from a separate FreeRTOS task (thread)!
+
 void onEvent(arduino_event_id_t event)
 {
   switch (event)
@@ -83,17 +86,14 @@ float healthTimer = 0;
 WiFiClient ethClient;
 PubSubClient client(ethClient);
 
-
-InterceptSerial CustomSerial(Serial, client);
-
 void setupMQTT()
 {
   client.setServer(mqtt_server, mqtt_port);
 }
 
-void sendMQTTMessage()
+void printMQTTMessage()
 {
-  StaticJsonDocument<200> jsonDoc;
+  JsonDocument jsonDoc;
   jsonDoc["type"] = device_type;
   jsonDoc["time"] = get_timestamp();
   jsonDoc["temperature"] = get_temperature();
@@ -115,12 +115,41 @@ void sendMQTTMessage()
 
   char buffer[512];
   serializeJson(jsonDoc, buffer);
-
-  client.publish(mqtt_topic.c_str(), buffer, 512);
+  Serial.println("MQTT Payload");
+  Serial.println(buffer);
+  // client.publish(mqtt_topic.c_str(), buffer, 512);
 }
-void connectMQTT()
+void sendMQTTMessage()
 {
-  while (!client.connected())
+  JsonDocument jsonDoc;
+  jsonDoc["type"] = device_type;
+  jsonDoc["time"] = get_timestamp();
+  jsonDoc["temperature"] = get_temperature();
+  jsonDoc["humidity"] = get_humidity();
+  jsonDoc["pressure"] = get_pressure();
+  jsonDoc["altitude"] = get_altitude();
+  jsonDoc["noise_level"] = get_db();
+  if (get_ens160_connection_status())
+  {
+    jsonDoc["ens160_status"] = get_ens160_status();
+    jsonDoc["aqi"] = get_aqi();
+    jsonDoc["tvoc"] = get_tvoc();
+    jsonDoc["eco2"] = get_eco2();
+  }
+  jsonDoc["mq135_aqi"] = get_aqi_mq135();
+  jsonDoc["ldr"] = get_ldr();
+  jsonDoc["limit_sw"] = get_limit_sw_state();
+  jsonDoc["pir"] = get_pir();
+
+  char buffer[512];
+
+  size_t n = serializeJson(jsonDoc, buffer);
+  client.publish(mqtt_topic.c_str(), buffer, n);
+  client.publish("SNN", "TEST");
+}
+int connectMQTT()
+{
+  if (!client.connected())
   {
     Serial.print("Attempting MQTT connection...");
     if (client.connect("ESP32Client", mqtt_user, mqtt_password))
@@ -134,6 +163,11 @@ void connectMQTT()
       Serial.println(" try again in 5 seconds");
       delay(5000);
     }
+    return 0;
+  }
+  else
+  {
+    return 1;
   }
 }
 void setup()
@@ -167,13 +201,23 @@ void setup()
   analogReadResolution(12); // Optional: Set ADC resolution (default is 12 bits)
 
   // Use one of the ADC pins for the random seed
-  randomSeed(analogRead(34)); // Using GPIO 34 (ADC1 Channel 6) as an example
+  randomSeed(micros());
 
   Serial.println("Random Seed initialized.");
+  // for (int i = 0; i < 20; i++)
+  // {
+  //   printMQTTMessage();
+  // }
+  client.setBufferSize(512);
   setupMQTT();
-  connectMQTT();
+  while (!connectMQTT())
+  {
+    delay(2000);
+  }
+
   delay(100);
   sendMQTTMessage();
+
   userScheduler.addTask(taskSendMessage);
   taskSendMessage.enable();
 }
@@ -182,18 +226,31 @@ void loop()
 {
   loop_limit_switch();
 
-  digitalWrite(LED, !onFlag);
+  if (eth_connected && connectMQTT())
+  {
+    digitalWrite(LED, false);
+  }
+  else
+  {
+    digitalWrite(LED, true);
+  }
   // Send MQTT Message.
   while (!eth_connected)
   {
+
     delay(100);
+    userScheduler.execute(); // Run the scheduler
   }
+
   client.loop(); // Ensure the MQTT client is looped
+
   userScheduler.execute(); // Run the scheduler
 }
 
 void sendMessage()
 {
+
   sendMQTTMessage();
-  taskSendMessage.setInterval(TASK_SECOND * 1.5); // between 1 and 5 seconds
+
+  taskSendMessage.setInterval(TASK_SECOND * 1.5); // Schedule next sending
 }

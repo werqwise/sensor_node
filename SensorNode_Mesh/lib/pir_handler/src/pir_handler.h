@@ -77,7 +77,7 @@ float PirSensor::readValue()
 }
 
 #define PUBLISH_INTERVAL 15
-#define MOTION_SENSOR_PIN 39
+#define MOTION_SENSOR_PIN 3
 
 PirSensor motion = PirSensor(MOTION_SENSOR_PIN, 2, false, false);
 

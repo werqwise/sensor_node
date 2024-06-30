@@ -7,12 +7,9 @@ void loop_limit_switch();
 void LongPressStart(void *oneButton);
 void LongPressStop(void *oneButton);
 
-#if defined(ESP32)
-// Example pin assignments for a ESP32 board
-// Some boards have a BOOT switch using GPIO 0.
-#define PIN_INPUT 18
+#define PIN_INPUT 34
 
-#endif
+
 int limit_sw_state = 0;
 // Setup a new OneButton on pin PIN_INPUT
 // The 2. parameter activeLOW is true, because external wiring sets the button to LOW when pressed.
@@ -26,6 +23,7 @@ OneButton button(PIN_INPUT, true);
 // setup code here, to run once:
 int setup_limit_switch()
 {
+    // pinMode(PIN_INPUT, INPUT_PULLUP);
     // link functions to be called on events.
     button.attachLongPressStart(LongPressStart, &button);
     // button.attachDuringLongPress(DuringLongPress, &button);
@@ -60,5 +58,6 @@ void LongPressStop(void *oneButton)
 
 int get_limit_sw_state()
 {
+    // limit_sw_state=digitalRead(PIN_INPUT);
     return limit_sw_state;
 }
