@@ -136,7 +136,7 @@ Other components pin connection details
 
 | Limit Switch Pins | ESP32 | 
 | :--- | :--- | 
-| `PIN1(C)` | `18` |
+| `PIN1(C)` | `02` |
 | `PIN2(NO)` | `GND` |
 
 ![limsw](circuit/limsw.jpeg)
@@ -147,8 +147,8 @@ Other components pin connection details
 
 | ENS160 Pins | ESP32 | 
 | :--- | :--- | 
-| `SCL` | `GPIO22` |
-| `SDA` | `GPIO21` |
+| `SCL` | `GPIO16` |
+| `SDA` | `GPIO13` |
 | `GND` | `GND` |
 | `VIN` | `3V3` |
 
@@ -160,8 +160,8 @@ Other components pin connection details
 
 | BME280 Pins | ESP32 | 
 | :--- | :--- | 
-| `SCL` | `GPIO22` |
-| `SDA` | `GPIO21` |
+| `SCL` | `GPIO16` |
+| `SDA` | `GPIO13` |
 | `GND` | `GND` |
 | `VIN` | `3V3` |
 
@@ -175,7 +175,7 @@ Other components pin connection details
 | :--- | :--- | 
 | `+` | `3v3` |
 | `GND` | `GND` |
-| `DO` | `GPIO39` |
+| `DO` | `GPIO32` |
 
 ![MINIpir](circuit/minipir.jpeg)
 
@@ -199,9 +199,9 @@ Other components pin connection details
 | :--- | :--- | 
 | `VDD` | `3v3` |
 | `GND` | `GND` |
-| `L/R` | `GPIO25` |
-| `WS` | `GPIO25` |
-| `SCK` | `GPIO32` |
+| `L/R` | `GPIO14` |
+| `WS` | `GPIO14` |
+| `SCK` | `GPIO15` |
 | `SD` | `GPIO33` |
 
 ![ldr](circuit/inmp441.jpeg)
