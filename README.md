@@ -262,144 +262,45 @@ Following components are used to make this project
 ### JSON Structure
 ```json
 {
-    "nodes": [
-        {
-            "macAddress": "E8:6B:EA:CF:DB:B0",
-            "data": {
-                "altitude": "44330.00",
-                "humidity": "0.00",
-                "ldr": "553",
-                "limit_sw": "0",
-                "mq135_aqi": "0",
-                "noise_level": "43.49",
-                "pir": "0",
-                "pressure": "0.00",
-                "temperature": "0.00",
-                "time": "618057"
-            },
-            "rssi": -62
-        },
-        {
-            "macAddress": "FC:B4:67:F5:FF:70",
-            "data": {
-                "altitude": "44330.00",
-                "humidity": "0.00",
-                "ldr": "909",
-                "limit_sw": "0",
-                "mq135_aqi": "253",
-                "noise_level": "50.24",
-                "pir": "0",
-                "pressure": "0.00",
-                "temperature": "0.00",
-                "time": "178536"
-            },
-            "rssi": -57
-        }
-    ],
-    "bridge_mac": "94:B5:55:F8:A9:04"
+    "type": "POE",
+    "time": "612519",
+    "temperature": 0,
+    "humidity": 0,
+    "pressure": 0,
+    "altitude": 44330,
+    "noise_level": -92.65919495,
+    "mq135_aqi": 60,
+    "ldr": 4095,
+    "limit_sw": 0,
+    "pir": 0
 }
 ```
 ### Detailed Explanation
-1. `Root Object`: The JSON data starts with a root object that contains two main elements:
+1. `Type`: Type of the payload.
+2. `altitude`: A string representing the altitude measurement.
 
-    1. `nodes`: An array of sensor node objects.
+ 3. `humidity`: A string representing the humidity level.
 
-    2. `bridge_mac`: A string representing the MAC address of the bridge device.
+ 4. `ldr`: A string representing the Light Dependent Resistor (LDR) value, which measures light intensity.
 
-2. `Nodes Array`: This is an array of objects, where each object represents a sensor node. Each node object contains the following fields:
+ 5. `limit_sw`: A string indicating the status of a limit switch.
 
-    1. `macAddress`: A string representing the MAC address of the sensor node.
+ 6. `mq135_aqi`: A string representing the air quality index measured by the MQ135 sensor.
 
-    2. `data`: An object containing various sensor readings and other related data.
+ 7. `noise_level`: A string representing the noise level.
 
-    3. `rssi`: An integer representing the Received Signal Strength Indicator (RSSI) value.
+ 8. `pir`: A string indicating the status of a Passive Infrared (PIR) sensor, typically used for motion detection.
 
-3. `Data Object`: Inside each node object, the data object holds the actual sensor readings. The fields within the data object include:
+ 9. `pressure`: A string representing the atmospheric pressure.
 
-    1. `altitude`: A string representing the altitude measurement.
+ 10. `temperature`: A string representing the temperature.
 
-    2. `humidity`: A string representing the humidity level.
+ 11. `time`: A string representing the timestamp of the data reading.
 
-    3. `ldr`: A string representing the Light Dependent Resistor (LDR) value, which measures light intensity.
 
-    4. `limit_sw`: A string indicating the status of a limit switch.
-
-    5. `mq135_aqi`: A string representing the air quality index measured by the MQ135 sensor.
-
-    6. `noise_level`: A string representing the noise level.
-
-    7. `pir`: A string indicating the status of a Passive Infrared (PIR) sensor, typically used for motion detection.
-
-    8. `pressure`: A string representing the atmospheric pressure.
-
-    9. `temperature`: A string representing the temperature.
-
-    10. `time`: A string representing the timestamp of the data reading.
-
-### Handling Multiple Nodes
-The structure is designed to handle an arbitrary number of nodes. Each node in the `nodes` array follows the same format. Below is an example with three nodes:
-```json
-{
-    "nodes": [
-        {
-            "macAddress": "E8:6B:EA:CF:DB:B0",
-            "data": {
-                "altitude": "44330.00",
-                "humidity": "0.00",
-                "ldr": "553",
-                "limit_sw": "0",
-                "mq135_aqi": "0",
-                "noise_level": "43.49",
-                "pir": "0",
-                "pressure": "0.00",
-                "temperature": "0.00",
-                "time": "618057"
-            },
-            "rssi": -62
-        },
-        {
-            "macAddress": "FC:B4:67:F5:FF:70",
-            "data": {
-                "altitude": "44330.00",
-                "humidity": "0.00",
-                "ldr": "909",
-                "limit_sw": "0",
-                "mq135_aqi": "253",
-                "noise_level": "50.24",
-                "pir": "0",
-                "pressure": "0.00",
-                "temperature": "0.00",
-                "time": "178536"
-            },
-            "rssi": -57
-        },
-        {
-            "macAddress": "DA:8A:43:11:22:33",
-            "data": {
-                "altitude": "44330.00",
-                "humidity": "45.50",
-                "ldr": "700",
-                "limit_sw": "1",
-                "mq135_aqi": "100",
-                "noise_level": "60.12",
-                "pir": "1",
-                "pressure": "1013.25",
-                "temperature": "22.00",
-                "time": "123456"
-            },
-            "rssi": -50
-        }
-    ],
-    "bridge_mac": "94:B5:55:F8:A9:04"
-}
-
-```
 ### Key Considerations for Web Development
-1. `Dynamic Node Handling`: Ensure that the front-end application can dynamically handle an arbitrary number of nodes in the nodes array.
-2. `Data Parsing`: Each node's ``data`` object needs to be parsed to extract and display sensor readings correctly.
-3. `Timestamp Handling`: The ``time`` field is a string representing the timestamp of the reading. Ensure it is correctly parsed and formatted for display.
-4. `RSSI Values`: The ``rssi`` field provides the signal strength and may be useful for diagnostics or display purposes.
-5. `Error Handling`: Implement robust error handling for cases where sensor readings may be missing or malformed.
+1. `Error Handling`: Implement robust error handling for cases where sensor readings may be missing or malformed.
+
 
 ## ✍️ Authors <a name = "authors"></a>
 
