@@ -1,8 +1,0 @@
-mathertel/OneButton@^2.5.0
-PubSubClient
-adafruit/Adafruit BME280 Library@^2.2.4
-adafruit/Adafruit BMP280 Library@^2.6.8
-TaskScheduler
-dfrobot/DFRobot_ENS160@^1.0.1
-5orenso/PirSensor@^1.0.1
-bblanchon/ArduinoJson@^7.0.4
