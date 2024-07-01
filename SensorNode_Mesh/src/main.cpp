@@ -123,6 +123,7 @@ void sendMQTTMessage()
 {
   JsonDocument jsonDoc;
   jsonDoc["type"] = device_type;
+  jsonDoc["bridge_mac"] = mqtt_topic;
   jsonDoc["time"] = get_timestamp();
   jsonDoc["temperature"] = get_temperature();
   jsonDoc["humidity"] = get_humidity();
@@ -132,9 +133,9 @@ void sendMQTTMessage()
   if (get_ens160_connection_status())
   {
     jsonDoc["ens160_status"] = get_ens160_status();
-    jsonDoc["aqi"] = get_aqi();
-    jsonDoc["tvoc"] = get_tvoc();
-    jsonDoc["eco2"] = get_eco2();
+    jsonDoc["aqi"] = String(get_aqi());
+    jsonDoc["tvoc"] = String(get_tvoc());
+    jsonDoc["eco2"] = String(get_eco2());
   }
   jsonDoc["mq135_aqi"] = get_aqi_mq135();
   jsonDoc["ldr"] = get_ldr();
@@ -145,7 +146,6 @@ void sendMQTTMessage()
 
   size_t n = serializeJson(jsonDoc, buffer);
   client.publish(mqtt_topic.c_str(), buffer, n);
-  client.publish("SNN", "TEST");
 }
 int connectMQTT()
 {
@@ -173,6 +173,8 @@ int connectMQTT()
 void setup()
 {
   Serial.begin(115200);
+  // Wire.setPins(13, 16);
+  // Wire.begin();
   // Initialize Ethernet
   TrackerID = String(WiFi.macAddress());
   Serial.print("TrackerID: ");

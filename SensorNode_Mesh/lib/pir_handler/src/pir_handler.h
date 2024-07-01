@@ -40,25 +40,26 @@ PirSensor::~PirSensor()
 bool PirSensor::begin()
 {
     pinMode(pin, INPUT);
-    return digitalRead(pin) != -1; // Simple check to see if the pin is operational
+    return true;
 }
 
 int PirSensor::sampleValue()
 {
     unsigned long now = millis();
-    // Throttle sampling to no more than once every 500 milliseconds
     if (now - lastSample >= 500)
     {
         lastSample = now;
-        float newValue = digitalRead(pin);
+        int newValue = digitalRead(pin); // Changed to int for clarity with digitalRead
         samples[sampleIndex] = newValue;
         sampleIndex = (sampleIndex + 1) % samplesTotal;
         float lastValue = readValue();
-        // Return 1 for motion detected, 0 for no motion, -1 if no change
-        return (newValue == 1 && lastValue < 0.5) ? 1 : (newValue == 0 && lastValue > 0.5) ? 0
-                                                                                           : -1;
+        if (newValue == 1 && lastValue < 1)
+            return 1; // Adjusted to simpler logic
+        if (newValue == 0 && lastValue > 0)
+            return 0;
+        return -1;
     }
-    return -1; // No new sample taken
+    return -1;
 }
 
 float PirSensor::readValue()
