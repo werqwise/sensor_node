@@ -56,16 +56,55 @@ A step by step series that tell you how to get the Firmware and Backend running
 
 #### One-click Installation
 
+## Driver Installation
+1. Connect the ESP32 to the Computer USB Port.
+2. In Windows Search, search Device Manager and open it. Scroll down to Ports.
+![PORTS](./artwork/2.png)
+ - If the drivers are not installed you will see the CP2102 USB to UART Bridge Controller.
+ - If the Drivers are Installed You will See the Following in the Ports.
+ ![PORTS](./artwork/image.png)
+ - Here the Port is COM7 for the ESP32.
+1. To Install the Drivers Right Click on the `CP2102 USB to UART Bridge Controller` and then click on the `Update Driver / Install Driver`.
+2. Click on `Browse my Computer from Drivers` for Drivers Installation.
+![Driver Installation](./artwork/3.png)
+1. Select the `CP2102x_VCP_Windows` folder in the ESP32_Flasher folder to which the esp32_flasher.zip is extracted.
+![Driver Selection](./artwork/4.png)
+1. Click on `Next` and the drivers will be installed in some time. On Successful Installtion you will see the following message.
+![Installation Successful](./artwork//5.png)
+
+#### Uploading Firmware to ESP32
+1. Connect ESP32 to Computer USB Port.
+2. Go to the `ESP_Flasher` folder.
+3. Double Click on `ESP_Flasher.exe`.
+4. You will see the following Window.                                      
+![Flasher First](./artwork/flasher_1.png)
+ - If ESP32 is connected you will see the ESP32 Connected Message.
+5. In Windows Search, search Device Manager and open it. Scroll down to Ports.
+ - Here you see the `Silicon Labs CP210x USB to UART Bridge (COM7)`, it means ESP32 is connected to `COM7`.
+![Ports](./artwork/ports.png)
+
+6. Now Select the Port on which ESP32 is Connected from the Drop Down Menu.
+![Flasher Port](./artwork/flasher_port.png)
+7. Now in the ESP_Flasher tool Click on the `Browse Button` in front of Select Firmware (.bin).
+![Flasher Second](./artwork/flasher_2.png)
+ - This will open a window for Selecting the `.bin` file of the firmware.
+
+8. Open `release` folder of `BridgeNode_Mesh`.
+![Binaries](./artwork/binaries.png)
+ - Here you will find files with `.bin` extension. 
+ - Select this file and Click on Open.
+ ![Binaries-2](./artwork/binaries_2.png)
+9. You will now see the path of the `firmware .bin` file in the text field.                 
+![Flasher three](./artwork/flasher_3.png)
+10.  Now Click on the `Flash ESP32` Button.                                
+![Flasher four](./artwork/flasher_4.png)      
+11.  It will take some time and when the ESP32 is flashed successfully you will see the Message `Firmware flashed successfully!`. 
+![Flasher five](./artwork/flasher_5.png) 
 ```diff
-! Work in progress
++ Please note that the flasher might not respond for a few minutes and that is okay, it will eventually flash. 
 ```
 
-#### Platform.io Configs
-
-You should have Platform.io installed with the following pre-reqs
-
-  1.  ESP32 Board should be installed in Platform.io
-    
+12. Follow the same steps(7-11) for `SensorNode_Mesh`
 
 #### Sensor Nodes
 
@@ -75,16 +114,6 @@ Everything is already configured for Sensor Nodes Firmware and can be uploaded t
 
 Everything is already configured for the Bridge Node Firmware as well and can be uploaded to the respective node for testing.
 
-#### Gateway Node(Raspberry Pi)
-
-To make the firmware ready for the Raspberry Pi
-
-1.  Open the terminal and execute the following commands
-    1.  sudo apt update
-    2.  sudo apt upgrade
-    4.  sudo pip3 install --user pyserial
-2.  Run it using the following command
-        ```python3 /Desktop/PythonFirmware/pyFirmware.py ```
 
 ## Circuit <a name = "circuit"></a>
 ![Circuit Schematics](circuit/circuit_bb.png)
@@ -93,9 +122,9 @@ To make the firmware ready for the Raspberry Pi
 ### ESP32 Dev Module Pinout
 
 
-Follow the pinout diagram given below to connect different components to your WEMOS D1 mini.
+Follow the pinout diagram given below to connect different components to your ESP32-POE.
 
-![LoraPinout](circuit/wemos.png)
+![LoraPinout](circuit/ESP32-POE-GPIO.png)
 
 ### Components Connections
 
@@ -109,7 +138,7 @@ Other components pin connection details
 
 | Limit Switch Pins | ESP32 | 
 | :--- | :--- | 
-| `PIN1(C)` | `18` |
+| `PIN1(C)` | `34` |
 | `PIN2(NO)` | `GND` |
 
 ![limsw](circuit/limsw.jpeg)
@@ -120,8 +149,8 @@ Other components pin connection details
 
 | ENS160 Pins | ESP32 | 
 | :--- | :--- | 
-| `SCL` | `GPIO22` |
-| `SDA` | `GPIO21` |
+| `SCL` | `GPIO16` |
+| `SDA` | `GPIO13` |
 | `GND` | `GND` |
 | `VIN` | `3V3` |
 
@@ -133,8 +162,8 @@ Other components pin connection details
 
 | BME280 Pins | ESP32 | 
 | :--- | :--- | 
-| `SCL` | `GPIO22` |
-| `SDA` | `GPIO21` |
+| `SCL` | `GPIO16` |
+| `SDA` | `GPIO13` |
 | `GND` | `GND` |
 | `VIN` | `3V3` |
 
@@ -148,7 +177,7 @@ Other components pin connection details
 | :--- | :--- | 
 | `+` | `3v3` |
 | `GND` | `GND` |
-| `DO` | `GPIO39` |
+| `DO` | `GPIO03` |
 
 ![MINIpir](circuit/minipir.jpeg)
 
@@ -160,7 +189,7 @@ Other components pin connection details
 | :--- | :--- | 
 | `+` | `3v3` |
 | `GND` | `GND` |
-| `DO` | `GPIO34` |
+| `DO` | `GPIO36` |
 
 ![ldr](circuit/ldrmod.png)
 
@@ -172,8 +201,8 @@ Other components pin connection details
 | :--- | :--- | 
 | `VDD` | `3v3` |
 | `GND` | `GND` |
-| `L/R` | `GPIO25` |
-| `WS` | `GPIO25` |
+| `L/R` | `GPIO14` |
+| `WS` | `GPIO14` |
 | `SCK` | `GPIO32` |
 | `SD` | `GPIO33` |
 
@@ -193,13 +222,6 @@ High level architecture of the Mesh network
 4.  There could be unlimited number of sensor nodes in the mesh network.
 
 
-## How to Flash Firmware Binary using esptool
-[Video](https://youtu.be/PEvJFrWCtIc) for flashing firmware binary using esptool.
-
-Sample Command for flashing esp32 using esptool:
-```diff
-esptool -p COM7 -b 460800 --before default_reset --after hard_reset --chip esp32  write_flash --flash_mode dio --flash_size 2MB --flash_freq 40m 0x10000 .\deep_sleep.bin
-```
 ## Web App <a name="webapp"></a>
 ```diff
 + For future use
