@@ -45,7 +45,7 @@ Scheduler userScheduler; // to control your personal task
 
 bool calc_delay = false;
 
-Task taskSendMessage(TASK_SECOND * 1.5, TASK_FOREVER, &sendMessage); // start with a one second interval
+Task taskSendMessage(TASK_MINUTE * 5, TASK_FOREVER, &sendMessage); // start with a one second interval
 // WARNING: onEvent is called from a separate FreeRTOS task (thread)!
 
 void onEvent(arduino_event_id_t event)
@@ -123,7 +123,7 @@ void sendMQTTMessage()
 {
   JsonDocument jsonDoc;
   jsonDoc["type"] = device_type;
-  jsonDoc["bridge_mac"] = mqtt_topic;
+  jsonDoc["bridge_mac"] = TrackerID;
   jsonDoc["time"] = get_timestamp();
   jsonDoc["temperature"] = get_temperature();
   jsonDoc["humidity"] = get_humidity();
@@ -254,5 +254,5 @@ void sendMessage()
 
   sendMQTTMessage();
 
-  taskSendMessage.setInterval(TASK_SECOND * 1.5); // Schedule next sending
+  taskSendMessage.setInterval(TASK_MINUTE * 5); // Schedule next sending
 }
