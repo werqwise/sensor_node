@@ -136,7 +136,7 @@ Other components pin connection details
 
 | Limit Switch Pins | ESP32 | 
 | :--- | :--- | 
-| `PIN1(C)` | `02` |
+| `PIN1(C)` | `34` |
 | `PIN2(NO)` | `GND` |
 
 ![limsw](circuit/limsw.jpeg)
@@ -175,7 +175,7 @@ Other components pin connection details
 | :--- | :--- | 
 | `+` | `3v3` |
 | `GND` | `GND` |
-| `DO` | `GPIO32` |
+| `DO` | `GPIO03` |
 
 ![MINIpir](circuit/minipir.jpeg)
 
@@ -187,7 +187,7 @@ Other components pin connection details
 | :--- | :--- | 
 | `+` | `3v3` |
 | `GND` | `GND` |
-| `DO` | `GPIO34` |
+| `DO` | `GPIO36` |
 
 ![ldr](circuit/ldrmod.png)
 
@@ -201,7 +201,7 @@ Other components pin connection details
 | `GND` | `GND` |
 | `L/R` | `GPIO14` |
 | `WS` | `GPIO14` |
-| `SCK` | `GPIO15` |
+| `SCK` | `GPIO32` |
 | `SD` | `GPIO33` |
 
 ![ldr](circuit/inmp441.jpeg)
