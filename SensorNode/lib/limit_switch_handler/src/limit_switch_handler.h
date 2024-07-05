@@ -6,11 +6,15 @@ int setup_limit_switch();
 void loop_limit_switch();
 void LongPressStart(void *oneButton);
 void LongPressStop(void *oneButton);
+typedef void (*LongPressStopCallback)(void *oneButton);
+
+void setLongPressStopCallback(LongPressStopCallback callback);
 
 #define PIN_INPUT 34
 
-
 int limit_sw_state = 0;
+LongPressStopCallback longPressStopCallback = nullptr;
+
 // Setup a new OneButton on pin PIN_INPUT
 // The 2. parameter activeLOW is true, because external wiring sets the button to LOW when pressed.
 OneButton button(PIN_INPUT, true);
@@ -53,11 +57,24 @@ void LongPressStop(void *oneButton)
 {
     //   Serial.print(((OneButton *)oneButton)->getPressedMs());
     //   Serial.println("\t - LongPressStop()\n");
-    limit_sw_state = 0;
+    // limit_sw_state = 0;
+    // Call the callback function if it is set
+    if (longPressStopCallback)
+    {
+        longPressStopCallback(oneButton);
+    }
 }
-
+// Function to set the callback function
+void setLongPressStopCallback(LongPressStopCallback callback)
+{
+    longPressStopCallback = callback;
+}
 int get_limit_sw_state()
 {
     // limit_sw_state=digitalRead(PIN_INPUT);
     return limit_sw_state;
+}
+
+void clear_limit_sw_state(){
+    limit_sw_state=0;
 }

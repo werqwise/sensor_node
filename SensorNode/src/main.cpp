@@ -40,6 +40,7 @@ void newConnectionCallback(uint32_t nodeId);
 void changedConnectionCallback();
 void nodeTimeAdjustedCallback(int32_t offset);
 void delayReceivedCallback(uint32_t from, int32_t delay);
+void customLongPressStopFunction(void *oneButton);
 
 Scheduler userScheduler; // to control your personal task
 
@@ -194,6 +195,7 @@ void setup()
   {
     calibrate_ens160(get_temperature(), get_humidity());
   }
+  setLongPressStopCallback(customLongPressStopFunction);
 
   WiFi.onEvent(onEvent);
   ETH.begin();
@@ -222,6 +224,11 @@ void setup()
 
   userScheduler.addTask(taskSendMessage);
   taskSendMessage.enable();
+}
+void customLongPressStopFunction(void *oneButton)
+{
+  sendMQTTMessage();
+  clear_limit_sw_state();
 }
 
 void loop()
