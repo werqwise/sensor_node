@@ -46,7 +46,7 @@ Scheduler userScheduler; // to control your personal task
 
 bool calc_delay = false;
 
-Task taskSendMessage(TASK_MINUTE * 5, TASK_FOREVER, &sendMessage); // start with a one second interval
+Task taskSendMessage(TASK_SECOND * 5, TASK_FOREVER, &sendMessage); // start with a one second interval
 // WARNING: onEvent is called from a separate FreeRTOS task (thread)!
 
 void onEvent(arduino_event_id_t event)
@@ -195,6 +195,7 @@ void setup()
   {
     calibrate_ens160(get_temperature(), get_humidity());
   }
+ 
   setLongPressStopCallback(customLongPressStopFunction);
 
   WiFi.onEvent(onEvent);
@@ -261,5 +262,5 @@ void sendMessage()
 
   sendMQTTMessage();
 
-  taskSendMessage.setInterval(TASK_MINUTE * 5); // Schedule next sending
+  taskSendMessage.setInterval(TASK_SECOND * 5); // Schedule next sending
 }

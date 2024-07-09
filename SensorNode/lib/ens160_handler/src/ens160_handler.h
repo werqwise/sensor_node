@@ -64,6 +64,33 @@ uint8_t get_eco2()
     get_ens160_status();
     return ENS160.getECO2();
 }
+
+
+#include <Wire.h>
+
+#define ENS160_ADDRESS 0x53
+
+class ENS160DIY {
+  public:
+    void begin() {
+      Wire.begin();
+    }
+
+    uint8_t readAQI() {
+      Wire.beginTransmission(ENS160_ADDRESS);
+      Wire.write(0x21);  // DATA_AQI register address
+      Wire.endTransmission();
+      Wire.requestFrom(ENS160_ADDRESS, 1);
+      
+      if (Wire.available() >= 1) {
+        uint8_t aqi = Wire.read() & 0x07;  // Read AQI value (bits 0-2)
+        return aqi;
+      }
+      
+      return 0;  // Return 0 if no data available
+    }
+};
+
 // void loop()
 // {
 
