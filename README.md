@@ -74,37 +74,37 @@ A step by step series that tell you how to get the Firmware and Backend running
 
 #### Uploading Firmware to ESP32
 1. Connect ESP32 to Computer USB Port.
-2. Go to the `ESP_Flasher` folder.
-3. Double Click on `ESP_Flasher.exe`.
+2. Get the [ESP_Flasher](https://github.com/3STechLabs-org/ESP32-Flasher/releases/)
+3. Double Click on `ESP_Flasher.exe` or the `ESP_Flasher` for MacOS.
 4. You will see the following Window.                                      
 ![Flasher First](./artwork/flasher_1.png)
  - If ESP32 is connected you will see the ESP32 Connected Message.
-5. In Windows Search, search Device Manager and open it. Scroll down to Ports.
+1. In Windows Search, search Device Manager and open it. Scroll down to Ports.
  - Here you see the `Silicon Labs CP210x USB to UART Bridge (COM7)`, it means ESP32 is connected to `COM7`.
 ![Ports](./artwork/ports.png)
 
-6. Now Select the Port on which ESP32 is Connected from the Drop Down Menu.
+1. Now Select the Port on which ESP32 is Connected from the Drop Down Menu.
 ![Flasher Port](./artwork/flasher_port.png)
-7. Now in the ESP_Flasher tool Click on the `Browse Button` in front of Select Firmware (.bin).
+1. Now in the ESP_Flasher tool Click on the `Browse Button` in front of Select Firmware (.bin).
 ![Flasher Second](./artwork/flasher_2.png)
  - This will open a window for Selecting the `.bin` file of the firmware.
 
-8. Open `release` folder of `BridgeNode_Mesh`.
+1. Open `release` folder of `BridgeNode_Mesh`.
 ![Binaries](./artwork/binaries.png)
  - Here you will find files with `.bin` extension. 
  - Select this file and Click on Open.
  ![Binaries-2](./artwork/binaries_2.png)
-9. You will now see the path of the `firmware .bin` file in the text field.                 
+1. You will now see the path of the `firmware .bin` file in the text field.                 
 ![Flasher three](./artwork/flasher_3.png)
-10.  Now Click on the `Flash ESP32` Button.                                
+1.   Now Click on the `Flash ESP32` Button.                                
 ![Flasher four](./artwork/flasher_4.png)      
-11.  It will take some time and when the ESP32 is flashed successfully you will see the Message `Firmware flashed successfully!`. 
+1.   It will take some time and when the ESP32 is flashed successfully you will see the Message `Firmware flashed successfully!`. 
 ![Flasher five](./artwork/flasher_5.png) 
 ```diff
 + Please note that the flasher might not respond for a few minutes and that is okay, it will eventually flash. 
 ```
 
-12. Follow the same steps(7-11) for `SensorNode_Mesh`
+1.  Follow the same steps(7-11) for `SensorNode_Mesh`
 
 #### Sensor Nodes
 
