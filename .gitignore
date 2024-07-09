@@ -2,3 +2,5 @@ demo/
 temp/
 .DS_Store
 .vscode
+BridgeNode_Mesh/.pio
+SensorNode_Mesh/.pio
