@@ -153,7 +153,8 @@ int connectMQTT()
   if (!client.connected())
   {
     Serial.print("Attempting MQTT connection...");
-    if (client.connect("ESP32Client", mqtt_user, mqtt_password))
+    String clientID = randomString(TrackerID);
+    if (client.connect(clientID.c_str(), mqtt_user, mqtt_password))
     {
       Serial.println("connected");
     }
@@ -195,7 +196,7 @@ void setup()
   {
     calibrate_ens160(get_temperature(), get_humidity());
   }
- 
+
   setLongPressStopCallback(customLongPressStopFunction);
 
   WiFi.onEvent(onEvent);
@@ -228,7 +229,10 @@ void setup()
 }
 void customLongPressStopFunction(void *oneButton)
 {
-  sendMQTTMessage();
+  if (is_limit_sw_state_changed())
+  {
+    sendMQTTMessage();
+  }
   clear_limit_sw_state();
 }
 
