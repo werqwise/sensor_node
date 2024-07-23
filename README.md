@@ -120,7 +120,7 @@ Everything is already configured for the Bridge Node Firmware as well and can be
 
 ## Schematics
 
-[embed](https://nbviewer.org/github/werqwise/sensor_node/blob/main/circuit/schematics_schem.pdf)[/embed]
+![embed](https://nbviewer.org/github/werqwise/sensor_node/blob/main/circuit/schematics_schem.pdf)
 
 
 ### ESP32 Dev Module Pinout
