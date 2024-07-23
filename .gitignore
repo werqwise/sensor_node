@@ -4,3 +4,5 @@ temp/
 .vscode
 BridgeNode_Mesh/.pio
 SensorNode_Mesh/.pio
+.pio
+.vscode
