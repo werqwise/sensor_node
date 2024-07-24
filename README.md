@@ -61,11 +61,11 @@ A step by step series that tell you how to get the Firmware and Backend running
 2. In Windows Search, search Device Manager and open it. Scroll down to Ports.
 ![PORTS](./artwork/2.png)
  - If the drivers are not installed you will see the CP2102 USB to UART Bridge Controller.
- - If the Drivers are Installed You will See the Following in the Ports.
+ - If the Drivers are Installed You will See the Following in the Ports.                                                      
  ![PORTS](./artwork/image.png)
  - Here the Port is COM7 for the ESP32.
 1. To Install the Drivers Right Click on the `CP2102 USB to UART Bridge Controller` and then click on the `Update Driver / Install Driver`.
-2. Click on `Browse my Computer from Drivers` for Drivers Installation.
+2. Click on `Browse my Computer from Drivers` for Drivers Installation.                                                                   
 ![Driver Installation](./artwork/3.png)
 1. Select the `CP2102x_VCP_Windows` folder in the ESP32_Flasher folder to which the esp32_flasher.zip is extracted.
 ![Driver Selection](./artwork/4.png)
