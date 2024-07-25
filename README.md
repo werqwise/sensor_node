@@ -107,10 +107,6 @@ A step by step series that tell you how to get the Firmware and Backend running
 
 Everything is already configured for Sensor Nodes Firmware and can be uploaded to the respective nodes for testing.
 
-#### Bridge Node
-
-Everything is already configured for the Bridge Node Firmware as well and can be uploaded to the respective node for testing.
-
 
 ## Circuit <a name = "circuit"></a>
 ![Circuit Schematics](circuit/circuit_bb.png)
@@ -120,7 +116,7 @@ Everything is already configured for the Bridge Node Firmware as well and can be
 ![schematics](circuit/schematics_schem.svg)
 
 
-### ESP32 Dev Module Pinout
+### ESP32 POE Module Pinout
 
 
 Follow the pinout diagram given below to connect different components to your ESP32-POE.
@@ -215,30 +211,12 @@ High level architecture of the Mesh network
 ![Circuit](circuit/sensor_arch.png)
 
 
-## 🎈 Usage <a name="usage"></a>
-
-1.  Open mqttConfigs.py file
-2.  Put your MQTT broker details there before running the firmware.
-3.  Connect Bridge Node to any USB port of the Raspberry Pi and then run the Firmware.
-4.  There could be unlimited number of sensor nodes in the mesh network.
-
-
 ## Web App <a name="webapp"></a>
-```diff
-+ For future use
-```
-[Dashboard Link: ]()
 
-You can access the webapp with following test acccount credentials
+[Dashboard Link: https://app.iot.werqwall.com/](https://app.iot.werqwall.com/)
 
-*   Email Address: `test@test.com`
-*   Password: `test`
+More details can be found in [Frontend repository](https://github.com/werqwise/Frontend/tree/main#werqwise-frontend).
 
-### Dashboard Screenshots
-
-```diff
-+ For future use
-```
 
 ## Smartphone App <a name="smartphoneapp"></a>
 ```diff
@@ -268,7 +246,6 @@ Following components are used to make this project
 ## ⛏️ Built Using <a name = "built_using"></a>
 
 - [Platform.io](https://platformio.org/) - Embedded Development Environment
-- [PainlessMesh](https://gitlab.com/painlessMesh/painlessMesh/) - Mesh Development Framework
 - [Python](https://www.python.org/) - Programming Language
 
 ## Demo Video
@@ -278,7 +255,7 @@ Following components are used to make this project
 ## Test Performed
 - List of tests performed from development perspective.
   - Hardware Assembly(INMP441, Limit Switch, ESP32, LDR, ENS160, BME280)
-  - Sensor Node and Bridge Node Firmware test(two sensor nodes and one bridge node)
+  - Sensor Node POE Firmware test
 
 
 ## JSON Parsing Guide
