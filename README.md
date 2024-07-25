@@ -103,8 +103,6 @@ A step by step series that tell you how to get the Firmware and Backend running
 ![Flasher Six](./artwork/flasher_6.png)
 
 
-1.  Follow the same steps(7-11) for `SensorNode_Mesh`
-
 #### Sensor Nodes
 
 Everything is already configured for Sensor Nodes Firmware and can be uploaded to the respective nodes for testing.
