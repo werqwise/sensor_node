@@ -7,7 +7,7 @@
 #include <bme680_handler.h>
 #include <inmp441_handler.h>
 #include <pms_handler.h>
-#include <mq135_handler.h>
+#include <scd40_handler.h>
 #include <ldr_handler.h>
 #include <limit_switch_handler.h>
 #include <pir_handler.h>
@@ -108,7 +108,7 @@ void printMQTTMessage()
   jsonDoc["PM_AE_UG_2_5"] = pms_sensor.getPM2_5();
   jsonDoc["PM_AE_UG_10_0"] = pms_sensor.getPM10_0();
 
-  jsonDoc["mq135_aqi"] = get_aqi_mq135();
+  jsonDoc["co2"] = getCO2();
   jsonDoc["ldr"] = get_ldr();
   jsonDoc["limit_sw"] = get_limit_sw_state();
   jsonDoc["pir"] = get_pir();
@@ -135,7 +135,8 @@ void sendMQTTMessage()
   jsonDoc["PM_AE_UG_2_5"] = pms_sensor.getPM2_5();
   jsonDoc["PM_AE_UG_10_0"] = pms_sensor.getPM10_0();
 
-  jsonDoc["mq135_aqi"] = get_aqi_mq135();
+  jsonDoc["co2"] = getCO2();
+
   jsonDoc["ldr"] = get_ldr();
   jsonDoc["limit_sw"] = get_limit_sw_state();
   jsonDoc["pir"] = get_pir();
@@ -188,6 +189,7 @@ void setup()
   sensors.auto_setup("INMP441", setup_inmp441, 5, 1);
   sensors.auto_setup("LIMIT_SW", setup_limit_switch, 5, 1);
   sensors.auto_setup("PIR_SENSOR", setup_pir, 5, 1);
+  sensors.auto_setup("SCD40_SENSOR", setup_scd40, 5, 1);
   pms_sensor.begin();
 
   setLongPressStopCallback(customLongPressStopFunction);
