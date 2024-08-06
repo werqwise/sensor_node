@@ -2,8 +2,8 @@
 #include "PMS.h"
 
 // Serial pins
-#define RX_PIN 39 // TX of Sensor
-#define TX_PIN 15 // RX of Sensor
+#define S2_RX_PIN 39 // TX of Sensor
+#define S2_TX_PIN 15 // RX of Sensor
 
 class PMSSensor
 {
@@ -13,7 +13,7 @@ public:
     int begin()
     {
         // Serial2.begin(9600);
-        serial2.begin(9600, SERIAL_8N1, RX_PIN, TX_PIN); // Configure UART2 with specified pins
+        serial2.begin(9600, SERIAL_8N1, S2_RX_PIN, S2_TX_PIN); // Configure UART2 with specified pins
 
         pms.passiveMode();
         pms.sleep();
