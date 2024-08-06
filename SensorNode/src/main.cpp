@@ -4,7 +4,7 @@
 #include <driver/adc.h>
 #include <ArduinoJson.h>
 #include <SensorManager.h>
-#include <bme280_handler.h>
+#include <bme680_handler.h>
 #include <inmp441_handler.h>
 #include <ens160_handler.h>
 #include <mq135_handler.h>
