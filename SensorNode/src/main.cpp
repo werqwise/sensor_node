@@ -6,7 +6,7 @@
 #include <SensorManager.h>
 #include <bme680_handler.h>
 #include <inmp441_handler.h>
-#include <ens160_handler.h>
+#include <pms_handler.h>
 #include <mq135_handler.h>
 #include <ldr_handler.h>
 #include <limit_switch_handler.h>
@@ -49,6 +49,7 @@ bool calc_delay = false;
 Task taskSendMessage(TASK_SECOND * 5, TASK_FOREVER, &sendMessage); // start with a one second interval
 // WARNING: onEvent is called from a separate FreeRTOS task (thread)!
 
+PMSSensor pms_sensor;
 void onEvent(arduino_event_id_t event)
 {
   switch (event)
@@ -103,13 +104,10 @@ void printMQTTMessage()
   jsonDoc["altitude"] = get_altitude();
   jsonDoc["gas"] = get_gas();
   jsonDoc["noise_level"] = get_db();
-  if (get_ens160_connection_status())
-  {
-    jsonDoc["ens160_status"] = get_ens160_status();
-    jsonDoc["aqi"] = get_aqi();
-    jsonDoc["tvoc"] = get_tvoc();
-    jsonDoc["eco2"] = get_eco2();
-  }
+  jsonDoc["PM_AE_UG_1_0"] = pms_sensor.getPM1_0();
+  jsonDoc["PM_AE_UG_2_5"] = pms_sensor.getPM2_5();
+  jsonDoc["PM_AE_UG_10_0"] = pms_sensor.getPM10_0();
+
   jsonDoc["mq135_aqi"] = get_aqi_mq135();
   jsonDoc["ldr"] = get_ldr();
   jsonDoc["limit_sw"] = get_limit_sw_state();
@@ -133,13 +131,10 @@ void sendMQTTMessage()
   jsonDoc["altitude"] = get_altitude();
   jsonDoc["gas"] = get_gas();
   jsonDoc["noise_level"] = get_db();
-  if (get_ens160_connection_status())
-  {
-    jsonDoc["ens160_status"] = get_ens160_status();
-    jsonDoc["aqi"] = String(get_aqi());
-    jsonDoc["tvoc"] = String(get_tvoc());
-    jsonDoc["eco2"] = String(get_eco2());
-  }
+  jsonDoc["PM_AE_UG_1_0"] = pms_sensor.getPM1_0();
+  jsonDoc["PM_AE_UG_2_5"] = pms_sensor.getPM2_5();
+  jsonDoc["PM_AE_UG_10_0"] = pms_sensor.getPM10_0();
+
   jsonDoc["mq135_aqi"] = get_aqi_mq135();
   jsonDoc["ldr"] = get_ldr();
   jsonDoc["limit_sw"] = get_limit_sw_state();
@@ -191,13 +186,9 @@ void setup()
   SensorManager sensors;
   sensors.auto_setup("BME680", setup_bme680, 5, 1);
   sensors.auto_setup("INMP441", setup_inmp441, 5, 1);
-  sensors.auto_setup("ENS160", setup_ens160, 5, 1);
   sensors.auto_setup("LIMIT_SW", setup_limit_switch, 5, 1);
   sensors.auto_setup("PIR_SENSOR", setup_pir, 5, 1);
-  if (get_ens160_connection_status())
-  {
-    calibrate_ens160(get_temperature(), get_humidity());
-  }
+  pms_sensor.begin();
 
   setLongPressStopCallback(customLongPressStopFunction);
 
@@ -241,7 +232,7 @@ void customLongPressStopFunction(void *oneButton)
 void loop()
 {
   loop_limit_switch();
-
+  pms_sensor.pms_loop();
   if (eth_connected && connectMQTT())
   {
     digitalWrite(LED, false);
