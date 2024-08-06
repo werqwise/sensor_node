@@ -101,6 +101,7 @@ void printMQTTMessage()
   jsonDoc["humidity"] = get_humidity();
   jsonDoc["pressure"] = get_pressure();
   jsonDoc["altitude"] = get_altitude();
+  jsonDoc["gas"] = get_gas();
   jsonDoc["noise_level"] = get_db();
   if (get_ens160_connection_status())
   {
@@ -130,6 +131,7 @@ void sendMQTTMessage()
   jsonDoc["humidity"] = get_humidity();
   jsonDoc["pressure"] = get_pressure();
   jsonDoc["altitude"] = get_altitude();
+  jsonDoc["gas"] = get_gas();
   jsonDoc["noise_level"] = get_db();
   if (get_ens160_connection_status())
   {
@@ -187,7 +189,7 @@ void setup()
 
   pinMode(LED, OUTPUT);
   SensorManager sensors;
-  sensors.auto_setup("BME680", setup_bme280, 5, 1);
+  sensors.auto_setup("BME680", setup_bme680, 5, 1);
   sensors.auto_setup("INMP441", setup_inmp441, 5, 1);
   sensors.auto_setup("ENS160", setup_ens160, 5, 1);
   sensors.auto_setup("LIMIT_SW", setup_limit_switch, 5, 1);

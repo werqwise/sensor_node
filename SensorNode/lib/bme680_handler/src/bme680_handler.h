@@ -1,20 +1,12 @@
 #include <Wire.h>
-// #include <SPI.h>
 #include <Adafruit_Sensor.h>
-#include <Adafruit_BME280.h>
-
-// #define BME_SCK 13
-// #define BME_MISO 12
-// #define BME_MOSI 11
-// #define BME_CS 10
+#include "Adafruit_BME680.h"
 
 #define SEALEVELPRESSURE_HPA (1013.25)
 
-Adafruit_BME280 bme; // I2C
-// Adafruit_BME280 bme(BME_CS); // hardware SPI
-// Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO, BME_SCK); // software SPI
+Adafruit_BME680 bme; // I2C
 
-int setup_bme280()
+int setup_bme680()
 {
 
     Serial.println(F("BME280 test"));
@@ -22,23 +14,23 @@ int setup_bme280()
     unsigned status;
 
     // default settings
-    status = bme.begin(0x76);
-    // You can also pass in a Wire library object like &Wire2
-    // status = bme.begin(0x76, &Wire2)
+    status = bme.begin();
+
     if (!status)
     {
-        Serial.println("Could not find a valid BME280 sensor, check wiring, address, sensor ID!");
-        Serial.print("SensorID was: 0x");
-        Serial.println(bme.sensorID(), 16);
-        Serial.print("        ID of 0xFF probably means a bad address, a BMP 180 or BMP 085\n");
-        Serial.print("   ID of 0x56-0x58 represents a BMP 280,\n");
-        Serial.print("        ID of 0x60 represents a BME 280.\n");
-        Serial.print("        ID of 0x61 represents a BME 680.\n");
+        Serial.println("Could not find a valid BME280 sensor, check wiring.");
         return 0;
     }
-
+    else
+    {
+        // Set up oversampling and filter initialization
+        bme.setTemperatureOversampling(BME680_OS_8X);
+        bme.setHumidityOversampling(BME680_OS_2X);
+        bme.setPressureOversampling(BME680_OS_4X);
+        bme.setIIRFilterSize(BME680_FILTER_SIZE_3);
+        bme.setGasHeater(320, 150); // 320*C for 150 ms
+    }
     Serial.println("-- Default Test --");
-    
 
     Serial.println();
     return 1;
@@ -62,4 +54,9 @@ float get_altitude()
 float get_humidity()
 {
     return bme.readHumidity();
+}
+
+float get_gas()
+{
+    return bme.readGas();
 }
