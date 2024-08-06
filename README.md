@@ -138,33 +138,29 @@ Other components pin connection details
 | `PIN1(C)` | `34` |
 | `PIN2(NO)` | `GND` |
 
-![limsw](circuit/limsw.jpeg)
+#### SCD40 - CO2 Sensor
 
-#### ENS160
+```SCD40 Connection with ESP32```
 
-```ENS160 Connection with ESP32```
-
-| ENS160 Pins | ESP32 | 
+| SCD40 Pins | ESP32 | 
 | :--- | :--- | 
 | `SCL` | `GPIO16` |
 | `SDA` | `GPIO13` |
 | `GND` | `GND` |
-| `VIN` | `3V3` |
+| `VDD` | `3V3` |
 
-![ens160](circuit/ens160.png)
 
-#### BME280
+#### BME680
 
-```BME280 Connection with ESP32```
+```BME680 Connection with ESP32```
 
-| BME280 Pins | ESP32 | 
+| BME680 Pins | ESP32 | 
 | :--- | :--- | 
 | `SCL` | `GPIO16` |
 | `SDA` | `GPIO13` |
 | `GND` | `GND` |
-| `VIN` | `3V3` |
+| `VCC` | `3V3` |
 
-![bme280](circuit/bme280.jpeg)
 
 #### Mini PIR
 
@@ -176,7 +172,18 @@ Other components pin connection details
 | `GND` | `GND` |
 | `DO` | `GPIO03` |
 
-![MINIpir](circuit/minipir.jpeg)
+#### Microwave Radar - Human Presence Sensor
+
+```Microwave Radat Connection with ESP32```
+
+| Microwave Radar Pins | ESP32 | 
+| :--- | :--- | 
+| `RX` | `GPIO4` |
+| `TX` | `GPIO5` |
+| `GND` | `GND` |
+| `VCC` | `5V` |
+
+![mw](circuit/microwave.jpg)
 
 #### LDR
 
@@ -184,11 +191,10 @@ Other components pin connection details
 
 | LDR Pins | ESP32 | 
 | :--- | :--- | 
-| `+` | `3v3` |
+| `VCC` | `3v3` |
 | `GND` | `GND` |
-| `DO` | `GPIO36` |
+| `AO` | `GPIO36` |
 
-![ldr](circuit/ldrmod.png)
 
 #### INMP441
 
@@ -203,7 +209,17 @@ Other components pin connection details
 | `SCK` | `GPIO32` |
 | `SD` | `GPIO33` |
 
-![ldr](circuit/inmp441.jpeg)
+#### PMS5003 - Digital Particle Concentration Laser Sensor
+
+```PMS5003 Connection with ESP32```
+
+| PMS5003 Pins | ESP32 | 
+| :--- | :--- | 
+| `TX` | `GPIO39` |
+| `RX` | `GPIO15` |
+| `GND` | `GND` |
+| `VCC` | `5V` |
+
 
 ## 🔧 Mesh Architecture <a name = "circuit"></a>
 
