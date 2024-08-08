@@ -17,7 +17,10 @@
 #include <PubSubClient.h>
 #include "SStack.h"
 #include <TaskScheduler.h> // Include TaskScheduler library
+#include <esp32_i2c_comm.h>
 
+ESP32I2CComm i2cComm;
+const int SLAVE_ADDRESS = 0x55;
 static bool eth_connected = false;
 #define LED 2 // GPIO number of connected LED, ON ESP-12 IS GPIO2
 
@@ -42,6 +45,8 @@ void changedConnectionCallback();
 void nodeTimeAdjustedCallback(int32_t offset);
 void delayReceivedCallback(uint32_t from, int32_t delay);
 void customLongPressStopFunction(void *oneButton);
+void onI2CReceive(String message);
+void mqtt_callback(char *topic, byte *payload, unsigned int length);
 
 Scheduler userScheduler; // to control your personal task
 
@@ -51,6 +56,25 @@ Task taskSendMessage(TASK_SECOND * 5, TASK_FOREVER, &sendMessage); // start with
 // WARNING: onEvent is called from a separate FreeRTOS task (thread)!
 
 PMSSensor pms_sensor;
+SensorManager sensors;
+
+void mqtt_callback(char *topic, byte *payload, unsigned int length)
+{
+  Serial.print("Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+  for (int i = 0; i < length; i++)
+  {
+    Serial.print((char)payload[i]);
+  }
+  Serial.println();
+}
+
+void onI2CReceive(String message)
+{
+  Serial.println("Received from slave: " + message);
+}
+
 void onEvent(arduino_event_id_t event)
 {
   switch (event)
@@ -92,6 +116,8 @@ PubSubClient client(ethClient);
 void setupMQTT()
 {
   client.setServer(mqtt_server, mqtt_port);
+  client.setCallback(mqtt_callback);
+  client.setBufferSize(512);
 }
 
 void printMQTTMessage()
@@ -126,6 +152,16 @@ void printMQTTMessage()
   Serial.println(buffer);
   // client.publish(mqtt_topic.c_str(), buffer, 512);
 }
+
+int esp32_i2c_comm_begin()
+{
+  if (!i2cComm.begin(SLAVE_ADDRESS, onI2CReceive, true))
+  {
+    Serial.println("Failed to initialize I2C master!");
+    return 0;
+  }
+  return 1;
+}
 void sendMQTTMessage()
 {
   JsonDocument jsonDoc;
@@ -152,6 +188,14 @@ void sendMQTTMessage()
   jsonDoc["ldr"] = get_ldr();
   jsonDoc["limit_sw"] = get_limit_sw_state();
   jsonDoc["pir"] = get_pir();
+  if (!sensors.setup_failed("ESP32_I2C_COMM"))
+  {
+    // if UWB tag/anchor is present
+    JsonObject uwb_location = jsonDoc.createNestedObject("uwb");
+    uwb_location["type"] = String("anchor");
+    uwb_location["x"] = 0.0;
+    uwb_location["y"] = 0.0;
+  }
 
   char buffer[512];
 
@@ -196,13 +240,14 @@ void setup()
   Serial.println(mqtt_topic);
 
   pinMode(LED, OUTPUT);
-  SensorManager sensors;
+
   sensors.auto_setup("BME680", setup_bme680, 5, 1);
   sensors.auto_setup("INMP441", setup_inmp441, 5, 1);
   sensors.auto_setup("LIMIT_SW", setup_limit_switch, 5, 1);
   sensors.auto_setup("PIR_SENSOR", setup_pir, 5, 1);
   sensors.auto_setup("SCD40_SENSOR", setup_scd40, 5, 1);
   sensors.auto_setup("LD2410_SENSOR", setup_ld2410, 5, 1);
+  sensors.auto_setup("ESP32_I2C_COMM", esp32_i2c_comm_begin, 5, 1);
   pms_sensor.begin();
 
   setLongPressStopCallback(customLongPressStopFunction);
@@ -247,6 +292,7 @@ void customLongPressStopFunction(void *oneButton)
 void loop()
 {
   loop_limit_switch();
+  i2cComm.update(); // Check for messages from slave
   pms_sensor.pms_loop();
   if (eth_connected && connectMQTT())
   {
