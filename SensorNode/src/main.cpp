@@ -57,7 +57,7 @@ Task taskSendMessage(TASK_SECOND * 5, TASK_FOREVER, &sendMessage); // start with
 PMSSensor pms_sensor;
 SensorManager sensors;
 
-ESP32ProximityComm comm(true, "master-esp32", "master-pass"); // Master example
+ESP32Comm comm(true, "master-esp32", "master-pass"); // Master example
 
 void mqtt_callback(char *topic, byte *payload, unsigned int length)
 {
@@ -69,12 +69,6 @@ void mqtt_callback(char *topic, byte *payload, unsigned int length)
     Serial.print((char)payload[i]);
   }
   Serial.println();
-}
-
-void onESP32WiFiReceive(String message)
-{
-  Serial.println("Received from slave: " + message);
-  uwb_msg = message;
 }
 
 void onEvent(arduino_event_id_t event)
@@ -122,6 +116,14 @@ void setupMQTT()
   client.setBufferSize(512);
 }
 
+void onESP32WiFiReceive(String message)
+{
+  Serial.println("Received from slave: " + message);
+  uwb_msg = message;
+  // String topic=mqtt_topic+String("/uwb");
+  // client.publish(topic.c_str(), message.c_str());
+}
+
 void printMQTTMessage()
 {
   JsonDocument jsonDoc;
@@ -157,17 +159,14 @@ void printMQTTMessage()
 
 int esp32_wifi_comm_begin()
 {
-  if (!comm.begin(onESP32WiFiReceive))
+  comm.begin();
+  comm.setDataCallback(onESP32WiFiReceive);
 
-  {
-    Serial.println("Failed to initialize ESP-NOW master!");
-
-    return 0;
-  }
   return 1;
 }
 void sendMQTTMessage()
 {
+
   JsonDocument jsonDoc;
   jsonDoc["type"] = device_type;
   jsonDoc["bridge_mac"] = TrackerID;
@@ -200,14 +199,15 @@ void sendMQTTMessage()
     uwb_location["x"] = 0.0;
     uwb_location["y"] = 0.0;
     uwb_location["uwb_msg"] = uwb_msg;
-    uwb_msg = "";
   }
 
   char buffer[512];
 
   size_t n = serializeJson(jsonDoc, buffer);
   client.publish(mqtt_topic.c_str(), buffer, n);
-  comm.sendBroadcast("POE;Hello from Master!");
+  comm.send("POE;Hello from Master!");
+  
+  uwb_msg = "";
 }
 int connectMQTT()
 {
@@ -247,14 +247,14 @@ void setup()
   Serial.println(mqtt_topic);
 
   pinMode(LED, OUTPUT);
-
+  sensors.auto_setup("ESP32_WIFI_COMM", esp32_wifi_comm_begin, 5, 1);
   sensors.auto_setup("BME680", setup_bme680, 5, 1);
   sensors.auto_setup("INMP441", setup_inmp441, 5, 1);
   sensors.auto_setup("LIMIT_SW", setup_limit_switch, 5, 1);
   sensors.auto_setup("PIR_SENSOR", setup_pir, 5, 1);
   sensors.auto_setup("SCD40_SENSOR", setup_scd40, 5, 1);
   sensors.auto_setup("LD2410_SENSOR", setup_ld2410, 5, 1);
-  sensors.auto_setup("ESP32_WIFI_COMM", esp32_wifi_comm_begin, 5, 1);
+
   pms_sensor.begin();
 
   setLongPressStopCallback(customLongPressStopFunction);
@@ -285,6 +285,7 @@ void setup()
   sendMQTTMessage();
 
   userScheduler.addTask(taskSendMessage);
+
   taskSendMessage.enable();
 }
 void customLongPressStopFunction(void *oneButton)

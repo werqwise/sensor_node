@@ -1,124 +1,98 @@
-#ifndef ESP32_PROXIMITY_COMM_H
-#define ESP32_PROXIMITY_COMM_H
+#ifndef ESP32_COMM_LIB_H
+#define ESP32_COMM_LIB_H
 
 #include <Arduino.h>
 #include <WiFi.h>
 
-class ESP32ProximityComm
-{
+class ESP32Comm {
 public:
-    ESP32ProximityComm(bool isMaster, const char *ssid, const char *password, IPAddress ip = IPAddress(192, 168, 4, 1), int port = 80);
-    bool begin(void (*onReceiveCallback)(String message));
-    void sendBroadcast(String message);
+    typedef void (*DataCallback)(String);
+
+    ESP32Comm(bool isMaster, const char* ssid, const char* password, int port = 8888);
+    void begin();
     void loop();
+    void send(String message);
+    void setDataCallback(DataCallback callback);
 
 private:
-    static void (*_onReceiveCallback)(String message);
     bool _isMaster;
-    const char *_ssid;
-    const char *_password;
-    IPAddress _ip;
+    const char* _ssid;
+    const char* _password;
     int _port;
-    WiFiServer *_server;
+    WiFiServer* _server;
     WiFiClient _client;
-    WiFiClient _slaveClient;
+    DataCallback _dataCallback;
+    unsigned long _lastReconnectAttempt;
 
-    void startMaster();
-    void startSlave();
+    void setupWiFi();
+    void handleConnection();
+    void reconnect();
 };
 
-void (*ESP32ProximityComm::_onReceiveCallback)(String message) = nullptr;
+ESP32Comm::ESP32Comm(bool isMaster, const char* ssid, const char* password, int port)
+    : _isMaster(isMaster), _ssid(ssid), _password(password), _port(port), _server(nullptr), _dataCallback(nullptr), _lastReconnectAttempt(0) {}
 
-ESP32ProximityComm::ESP32ProximityComm(bool isMaster, const char *ssid, const char *password, IPAddress ip, int port)
-    : _isMaster(isMaster), _ssid(ssid), _password(password), _ip(ip), _port(port), _server(nullptr) {}
-
-bool ESP32ProximityComm::begin(void (*onReceiveCallback)(String message))
-{
-    _onReceiveCallback = onReceiveCallback;
-
-    if (_isMaster)
-    {
-        startMaster();
+void ESP32Comm::begin() {
+    setupWiFi();
+    if (_isMaster) {
+        _server = new WiFiServer(_port);
+        _server->begin();
     }
-    else
-    {
-        startSlave();
-    }
-
-    return true;
 }
 
-void ESP32ProximityComm::startMaster()
-{
-    WiFi.mode(WIFI_AP);
-    WiFi.softAP(_ssid, _password);
-
-    _server = new WiFiServer(_port);
-    _server->begin();
-
-    Serial.println("Master started as Access Point.");
-}
-
-void ESP32ProximityComm::startSlave()
-{
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(_ssid, _password);
-
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        delay(1000);
-        Serial.println("Connecting to AP...");
-    }
-
-    _slaveClient.connect(_ip, _port);
-    Serial.println("Slave connected to Master.");
-}
-
-void ESP32ProximityComm::sendBroadcast(String message)
-{
-    if (_isMaster)
-    {
-        if (_client && _client.connected())
-        {
-            _client.print(message);
+void ESP32Comm::loop() {
+    if (_isMaster) {
+        handleConnection();
+    } else {
+        if (!_client.connected()) {
+            reconnect();
         }
     }
-    else
-    {
-        if (_slaveClient && _slaveClient.connected())
-        {
-            _slaveClient.print(message);
+
+    if (_client.connected() && _client.available()) {
+        String data = _client.readStringUntil('\n');
+        if (_dataCallback) {
+            _dataCallback(data);
         }
     }
 }
 
-void ESP32ProximityComm::loop()
-{
-    if (_isMaster)
-    {
+void ESP32Comm::send(String message) {
+    if (_client.connected()) {
+        _client.println(message);
+    }
+}
+
+void ESP32Comm::setDataCallback(DataCallback callback) {
+    _dataCallback = callback;
+}
+
+void ESP32Comm::setupWiFi() {
+    WiFi.mode(_isMaster ? WIFI_AP_STA : WIFI_STA);
+    if (_isMaster) {
+        WiFi.softAP(_ssid, _password);
+    } else {
+        WiFi.begin(_ssid, _password);
+        while (WiFi.status() != WL_CONNECTED) {
+            delay(500);
+        }
+    }
+}
+
+void ESP32Comm::handleConnection() {
+    if (!_client || !_client.connected()) {
         _client = _server->available();
-        if (_client && _client.connected())
-        {
-            if (_client.available())
-            {
-                String message = _client.readStringUntil('\n');
-                if (_onReceiveCallback)
-                {
-                    _onReceiveCallback(message);
-                }
-            }
-        }
     }
-    else
-    {
-        if (_slaveClient && _slaveClient.connected() && _slaveClient.available())
-        {
-            String message = _slaveClient.readStringUntil('\n');
-            if (_onReceiveCallback)
-            {
-                _onReceiveCallback(message);
-            }
+}
+
+void ESP32Comm::reconnect() {
+    unsigned long now = millis();
+    if (now - _lastReconnectAttempt > 5000) {
+        _lastReconnectAttempt = now;
+        if (_client.connect(WiFi.gatewayIP(), _port)) {
+            _lastReconnectAttempt = 0;
         }
     }
 }
-#endif // ESP32_PROXIMITY_COMM_H
+
+#endif // ESP32_COMM_LIB_H
