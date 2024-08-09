@@ -200,6 +200,7 @@ void sendMQTTMessage()
     uwb_location["x"] = 0.0;
     uwb_location["y"] = 0.0;
     uwb_location["uwb_msg"] = uwb_msg;
+    uwb_msg = "";
   }
 
   char buffer[512];
