@@ -17,10 +17,10 @@
 #include <PubSubClient.h>
 #include "SStack.h"
 #include <TaskScheduler.h> // Include TaskScheduler library
-#include <esp32_i2c_comm.h>
+#include <esp32_comm.h>
 
-ESP32I2CComm i2cComm;
-const int SLAVE_ADDRESS = 0x55;
+ESP32ProximityComm proximityComm;
+
 static bool eth_connected = false;
 #define LED 2 // GPIO number of connected LED, ON ESP-12 IS GPIO2
 
@@ -34,6 +34,7 @@ const int mqtt_port = 1883;
 const char *mqtt_user = "mqtt_client";
 const char *mqtt_password = "mqtt_client";
 String mqtt_topic;
+String uwb_msg = "";
 // Prototypes
 void sendMessage();
 int connectMQTT();
@@ -45,7 +46,7 @@ void changedConnectionCallback();
 void nodeTimeAdjustedCallback(int32_t offset);
 void delayReceivedCallback(uint32_t from, int32_t delay);
 void customLongPressStopFunction(void *oneButton);
-void onI2CReceive(String message);
+void onESP32NowReceive(String message);
 void mqtt_callback(char *topic, byte *payload, unsigned int length);
 
 Scheduler userScheduler; // to control your personal task
@@ -70,9 +71,10 @@ void mqtt_callback(char *topic, byte *payload, unsigned int length)
   Serial.println();
 }
 
-void onI2CReceive(String message)
+void onESP32NowReceive(String message)
 {
   Serial.println("Received from slave: " + message);
+  uwb_msg = message;
 }
 
 void onEvent(arduino_event_id_t event)
@@ -153,11 +155,13 @@ void printMQTTMessage()
   // client.publish(mqtt_topic.c_str(), buffer, 512);
 }
 
-int esp32_i2c_comm_begin()
+int esp32_now_comm_begin()
 {
-  if (!i2cComm.begin(SLAVE_ADDRESS, onI2CReceive, true))
+  if (!proximityComm.begin(onESP32NowReceive))
+
   {
-    Serial.println("Failed to initialize I2C master!");
+    Serial.println("Failed to initialize ESP-NOW master!");
+
     return 0;
   }
   return 1;
@@ -188,13 +192,14 @@ void sendMQTTMessage()
   jsonDoc["ldr"] = get_ldr();
   jsonDoc["limit_sw"] = get_limit_sw_state();
   jsonDoc["pir"] = get_pir();
-  if (!sensors.setup_failed("ESP32_I2C_COMM"))
+  if (!sensors.setup_failed("ESP32_NOW_COMM"))
   {
     // if UWB tag/anchor is present
     JsonObject uwb_location = jsonDoc.createNestedObject("uwb");
     uwb_location["type"] = String("anchor");
     uwb_location["x"] = 0.0;
     uwb_location["y"] = 0.0;
+    uwb_location["uwb_msg"] = uwb_msg;
   }
 
   char buffer[512];
@@ -247,7 +252,7 @@ void setup()
   sensors.auto_setup("PIR_SENSOR", setup_pir, 5, 1);
   sensors.auto_setup("SCD40_SENSOR", setup_scd40, 5, 1);
   sensors.auto_setup("LD2410_SENSOR", setup_ld2410, 5, 1);
-  sensors.auto_setup("ESP32_I2C_COMM", esp32_i2c_comm_begin, 5, 1);
+  sensors.auto_setup("ESP32_NOW_COMM", esp32_now_comm_begin, 5, 1);
   pms_sensor.begin();
 
   setLongPressStopCallback(customLongPressStopFunction);
@@ -292,7 +297,7 @@ void customLongPressStopFunction(void *oneButton)
 void loop()
 {
   loop_limit_switch();
-  i2cComm.update(); // Check for messages from slave
+
   pms_sensor.pms_loop();
   if (eth_connected && connectMQTT())
   {
