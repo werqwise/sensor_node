@@ -116,12 +116,25 @@ void setupMQTT()
   client.setBufferSize(512);
 }
 
+String lastPublishedUWBMessage = "";
+
 void onESP32WiFiReceive(String message)
 {
   Serial.println("Received from slave: " + message);
   uwb_msg = message;
-  // String topic=mqtt_topic+String("/uwb");
-  // client.publish(topic.c_str(), message.c_str());
+
+  // Check if the new message is different from the last published one
+  if (message != lastPublishedUWBMessage)
+  {
+    String topic = mqtt_topic + String("/uwb");
+    client.publish(topic.c_str(), message.c_str());
+    lastPublishedUWBMessage = message; // Update the last published message
+    Serial.println("Published new message: " + message);
+  }
+  else
+  {
+    Serial.println("Message unchanged, not publishing");
+  }
 }
 
 void printMQTTMessage()
@@ -191,22 +204,14 @@ void sendMQTTMessage()
   jsonDoc["ldr"] = get_ldr();
   jsonDoc["limit_sw"] = get_limit_sw_state();
   jsonDoc["pir"] = get_pir();
-  if (!sensors.setup_failed("ESP32_WIFI_COMM"))
-  {
-    // if UWB tag/anchor is present
-    JsonObject uwb_location = jsonDoc.createNestedObject("uwb");
-    uwb_location["type"] = String("anchor");
-    uwb_location["x"] = 0.0;
-    uwb_location["y"] = 0.0;
-    uwb_location["uwb_msg"] = uwb_msg;
-  }
+  
 
   char buffer[512];
 
   size_t n = serializeJson(jsonDoc, buffer);
   client.publish(mqtt_topic.c_str(), buffer, n);
   comm.send("POE;Hello from Master!");
-  
+
   uwb_msg = "";
 }
 int connectMQTT()

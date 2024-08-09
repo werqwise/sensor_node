@@ -62,6 +62,7 @@ void ESP32Comm::loop()
         while (_client.available())
         {
             String data = _client.readStringUntil('\n');
+            data.trim();
             if (_dataCallback)
             {
                 _dataCallback(data);
