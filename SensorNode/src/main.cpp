@@ -19,8 +19,6 @@
 #include <TaskScheduler.h> // Include TaskScheduler library
 #include <esp32_comm.h>
 
-ESP32ProximityComm proximityComm;
-
 static bool eth_connected = false;
 #define LED 2 // GPIO number of connected LED, ON ESP-12 IS GPIO2
 
@@ -46,7 +44,7 @@ void changedConnectionCallback();
 void nodeTimeAdjustedCallback(int32_t offset);
 void delayReceivedCallback(uint32_t from, int32_t delay);
 void customLongPressStopFunction(void *oneButton);
-void onESP32NowReceive(String message);
+void onESP32WiFiReceive(String message);
 void mqtt_callback(char *topic, byte *payload, unsigned int length);
 
 Scheduler userScheduler; // to control your personal task
@@ -58,6 +56,8 @@ Task taskSendMessage(TASK_SECOND * 5, TASK_FOREVER, &sendMessage); // start with
 
 PMSSensor pms_sensor;
 SensorManager sensors;
+
+ESP32ProximityComm comm(true, "master-esp32", "master-pass"); // Master example
 
 void mqtt_callback(char *topic, byte *payload, unsigned int length)
 {
@@ -71,7 +71,7 @@ void mqtt_callback(char *topic, byte *payload, unsigned int length)
   Serial.println();
 }
 
-void onESP32NowReceive(String message)
+void onESP32WiFiReceive(String message)
 {
   Serial.println("Received from slave: " + message);
   uwb_msg = message;
@@ -155,9 +155,9 @@ void printMQTTMessage()
   // client.publish(mqtt_topic.c_str(), buffer, 512);
 }
 
-int esp32_now_comm_begin()
+int esp32_wifi_comm_begin()
 {
-  if (!proximityComm.begin(onESP32NowReceive))
+  if (!comm.begin(onESP32WiFiReceive))
 
   {
     Serial.println("Failed to initialize ESP-NOW master!");
@@ -192,7 +192,7 @@ void sendMQTTMessage()
   jsonDoc["ldr"] = get_ldr();
   jsonDoc["limit_sw"] = get_limit_sw_state();
   jsonDoc["pir"] = get_pir();
-  if (!sensors.setup_failed("ESP32_NOW_COMM"))
+  if (!sensors.setup_failed("ESP32_WIFI_COMM"))
   {
     // if UWB tag/anchor is present
     JsonObject uwb_location = jsonDoc.createNestedObject("uwb");
@@ -206,6 +206,7 @@ void sendMQTTMessage()
 
   size_t n = serializeJson(jsonDoc, buffer);
   client.publish(mqtt_topic.c_str(), buffer, n);
+  comm.sendBroadcast("POE;Hello from Master!");
 }
 int connectMQTT()
 {
@@ -252,7 +253,7 @@ void setup()
   sensors.auto_setup("PIR_SENSOR", setup_pir, 5, 1);
   sensors.auto_setup("SCD40_SENSOR", setup_scd40, 5, 1);
   sensors.auto_setup("LD2410_SENSOR", setup_ld2410, 5, 1);
-  sensors.auto_setup("ESP32_NOW_COMM", esp32_now_comm_begin, 5, 1);
+  sensors.auto_setup("ESP32_WIFI_COMM", esp32_wifi_comm_begin, 5, 1);
   pms_sensor.begin();
 
   setLongPressStopCallback(customLongPressStopFunction);
@@ -297,6 +298,7 @@ void customLongPressStopFunction(void *oneButton)
 void loop()
 {
   loop_limit_switch();
+  comm.loop(); // This ensures the communication module processes any incoming messages
 
   pms_sensor.pms_loop();
   if (eth_connected && connectMQTT())
