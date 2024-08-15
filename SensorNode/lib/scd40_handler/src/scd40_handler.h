@@ -135,7 +135,7 @@ SCD40SensorData getSensorData()
 // Getter functions for individual sensor values
 uint16_t getCO2()
 {
-    return getSensorData().co2;
+    return getSensorData().co2;//in ppm
 }
 
 float getTemperature()
