@@ -1,0 +1,57 @@
+* SPICE Netlist for ESP32-PoE Circuit
+* Simplified version with focus on power supply and basic components
+
+* Define Power Supplies
+V1 VCC 0 DC 3.3V
+V2 VCC_5V 0 DC 5V
+
+* Define Ground
+GND 0
+
+* BME680 Sensor Connections (Simplified)
+* I2C lines are represented as ideal wires
+R_BME680_SCL SCL_BME680 0 1MEG
+R_BME680_SDA SDA_BME680 0 1MEG
+R_BME680_VCC VCC_BME680 0 1MEG
+R_BME680_GND GND_BME680 0 0
+
+* Mini PIR Sensor Connections
+R_PIR_DO GPIO3_PIR 0 1MEG
+R_PIR_VCC VCC_PIR 0 1MEG
+R_PIR_GND GND_PIR 0 0
+
+* Limit Switch Connections
+S1 GPIO34_LIMIT 0 GPIO34_LIMIT_SW
+R_LIMIT_GND GPIO34_LIMIT_SW GND 1MEG
+
+* LDR Module (Analog)
+R_LDR GPIO36_LDR 0 10k
+R_LDR_VCC VCC_LDR 0 1MEG
+R_LDR_GND GND_LDR 0 0
+
+* PMS5003 Sensor (Simplified, Focus on Power)
+R_PMS5003_VCC VCC_PMS5003 0 1MEG
+R_PMS5003_GND GND_PMS5003 0 0
+
+* INMP441 Microphone Module
+R_MIC_VDD VCC_MIC 0 1MEG
+R_MIC_GND GND_MIC 0 0
+
+* Microwave Radar Sensor
+R_MWR_VCC VCC_MWR 0 1MEG
+R_MWR_GND GND_MWR 0 0
+R_MWR_TX GPIO5_MWR 0 1MEG
+R_MWR_RX GPIO4_MWR 0 1MEG
+
+* SCD40 Sensor (Simplified, Focus on I2C and Power)
+R_SCD40_SCL SCL_SCD40 0 1MEG
+R_SCD40_SDA SDA_SCD40 0 1MEG
+R_SCD40_VDD VCC_SCD40 0 1MEG
+R_SCD40_GND GND_SCD40 0 0
+
+* ESP32-PoE (Simplified, Focus on Power Supply)
+R_ESP32_VCC VCC_ESP32 0 1MEG
+R_ESP32_GND GND_ESP32 0 0
+
+* End of Netlist
+.end
