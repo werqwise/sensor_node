@@ -2,6 +2,9 @@
 #include <driver/i2s.h>
 #include <math.h>
 
+float get_db();
+int setup_inmp441();
+float calculateSPL(float rms, float reference);
 #define SAMPLE_BUFFER_SIZE 512
 #define SAMPLE_RATE 8000
 #define I2S_MIC_CHANNEL I2S_CHANNEL_FMT_ONLY_LEFT
@@ -32,7 +35,13 @@ int setup_inmp441()
 {
 
     i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
-    i2s_set_pin(I2S_NUM_0, &i2s_mic_pins);
+    int err_code = i2s_set_pin(I2S_NUM_0, &i2s_mic_pins);
+    Serial.print("err_code INMP441: ");
+    Serial.println(err_code);
+    while (1)
+    {
+        get_db();
+    }
     return 1;
 }
 
@@ -64,5 +73,12 @@ float get_db()
     float spl = calculateSPL(rms, 0.00002); // Reference pressure 20 µPa
 
     Serial.printf("RMS: %f, SPL: %f dB\n", rms, spl);
+
+    // Check for patterns indicating no sensor
+    if (rms < 0.00001 || spl <= -92.0 || isinf(spl))
+    {
+        return 0.0; // Return 0 if sensor likely disconnected
+    }
+
     return spl;
 }
