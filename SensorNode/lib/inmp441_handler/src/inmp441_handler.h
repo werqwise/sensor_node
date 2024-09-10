@@ -38,10 +38,6 @@ int setup_inmp441()
     int err_code = i2s_set_pin(I2S_NUM_0, &i2s_mic_pins);
     Serial.print("err_code INMP441: ");
     Serial.println(err_code);
-    while (1)
-    {
-        get_db();
-    }
     return 1;
 }
 
