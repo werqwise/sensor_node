@@ -240,6 +240,28 @@ More details can be found in [Frontend repository](https://github.com/werqwise/F
 ```
 [Smartphone App Link: ]()
 
+## Testing and Debugging the Nodes
+
+In order to test or debug the potential issues or to discover the devices we can use MQTT Explorer.
+
+1. Get the [latest version of MQTT Explorer](https://github.com/thomasnordquist/MQTT-Explorer/releases/latest)
+2. Open the MQTT Explorer and add a new connection with the following details:
+![me1](artwork/me1.png)
+3. Go to `Advanced` settings and in `Subscriptions` box put `SensorData/#`:
+![me1](artwork/me2.png)
+4. Click on `+ ADD` button to add it. You can skip the other `Subscription Topics` as we don't need them.
+**Do not modify the `MQTT Client ID`**
+5. Click on `Back` button.
+6. Click on `Save` and then `Connect`
+![me1](artwork/me3.png)
+7. In the next screen, you will see all available and online devices. It auto discovers the devices as soon as they get internet connection.
+![me1](artwork/me4.png)
+8. Whenever a new data packet comes, they MAC address of the respective device will blink. You can also click on little bin icon next to `Topic` on right-hand side to delete any older/retained data but it is not necessary.
+9. You can click on any MAC address to see the incoming data details and sensor values.
+![me1](artwork/me5.png)
+10. To check if UWB is working, you will see a little dropdown button before the MAC address of the device which has a UWB module available. On clicking that, you will see UWB related data.
+
+
 ## List of Components <a name = "list"></a>
 ```diff
 + For future use; not a comprehensive list
