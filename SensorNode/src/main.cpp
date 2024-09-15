@@ -4,6 +4,20 @@
 #include <transparent_serial.h>
 #include <driver/adc.h>
 #include <ArduinoJson.h>
+#include <ETH.h>
+#include <WiFi.h>
+#include <PubSubClient.h>
+#include "SStack.h"
+#include <TaskScheduler.h> // Include TaskScheduler library
+
+WiFiClient ethClient;
+PubSubClient client(ethClient);
+
+// Create an instance of MySerial
+// Using String for topic
+String mqttTopic = String("SensorData/") + String(WiFi.macAddress()) + String("/logs");
+MqttSerial SMB(Serial, client, mqttTopic);
+
 #include <SensorManager.h>
 #include <bme680_handler.h>
 #include <inmp441_handler.h>
@@ -13,11 +27,6 @@
 #include <ld2410_handler.h>
 #include <limit_switch_handler.h>
 #include <pir_handler.h>
-#include <ETH.h>
-#include <WiFi.h>
-#include <PubSubClient.h>
-#include "SStack.h"
-#include <TaskScheduler.h> // Include TaskScheduler library
 #include <esp32_comm.h>
 #include <HTTPClient.h>
 
@@ -68,14 +77,14 @@ ESP32Comm comm(true, "master-esp32", "master-pass"); // Master example
 
 void mqtt_callback(char *topic, byte *payload, unsigned int length)
 {
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
+  SMB.print("Message arrived [");
+  SMB.print(topic);
+  SMB.print("] ");
   for (int i = 0; i < length; i++)
   {
-    Serial.print((char)payload[i]);
+    SMB.print((char)payload[i]);
   }
-  Serial.println();
+  SMB.println();
 }
 
 void onEvent(arduino_event_id_t event)
@@ -83,25 +92,25 @@ void onEvent(arduino_event_id_t event)
   switch (event)
   {
   case ARDUINO_EVENT_ETH_START:
-    Serial.println("ETH Started");
+    SMB.println("ETH Started");
     // The hostname must be set after the interface is started, but needs
     // to be set before DHCP, so set it from the event handler thread.
     ETH.setHostname("esp32-ethernet");
     break;
   case ARDUINO_EVENT_ETH_CONNECTED:
-    Serial.println("ETH Connected");
+    SMB.println("ETH Connected");
     break;
   case ARDUINO_EVENT_ETH_GOT_IP:
-    Serial.println("ETH Got IP");
-    Serial.println(ETH.localIP());
+    SMB.println("ETH Got IP");
+    SMB.println(ETH.localIP());
     eth_connected = true;
     break;
   case ARDUINO_EVENT_ETH_DISCONNECTED:
-    Serial.println("ETH Disconnected");
+    SMB.println("ETH Disconnected");
     eth_connected = false;
     break;
   case ARDUINO_EVENT_ETH_STOP:
-    Serial.println("ETH Stopped");
+    SMB.println("ETH Stopped");
     eth_connected = false;
     break;
   default:
@@ -113,13 +122,6 @@ Task blinkNoNodes;
 bool onFlag = false;
 String TrackerID = "";
 float healthTimer = 0;
-WiFiClient ethClient;
-PubSubClient client(ethClient);
-
-// Create an instance of MySerial
-// Using String for topic
-String mqttTopic = String(WiFi.macAddress()) + String("/logs");
-SerialMqttBridge SMB(Serial, client, mqttTopic);
 
 void setupMQTT()
 {
@@ -132,7 +134,7 @@ String lastPublishedUWBMessage = "";
 
 void onESP32WiFiReceive(String message)
 {
-  Serial.println("Received from slave: " + message);
+  SMB.println("Received from slave: " + message);
   uwb_msg = message;
 
   // Check if the new message is different from the last published one
@@ -141,11 +143,11 @@ void onESP32WiFiReceive(String message)
     String topic = mqtt_topic + String("/uwb");
     client.publish(topic.c_str(), message.c_str());
     lastPublishedUWBMessage = message; // Update the last published message
-    Serial.println("Published new message: " + message);
+    SMB.println("Published new message: " + message);
   }
   else
   {
-    Serial.println("Message unchanged, not publishing");
+    SMB.println("Message unchanged, not publishing");
   }
 }
 
@@ -187,8 +189,8 @@ bool getGeoLocation(String publicIP, float &latitude, float &longitude)
       DeserializationError error = deserializeJson(doc, payload);
       if (error)
       {
-        Serial.print("Failed to parse geolocation JSON: ");
-        Serial.println(error.c_str());
+        SMB.print("Failed to parse geolocation JSON: ");
+        SMB.println(error.c_str());
         http.end();
         return false;
       }
@@ -196,7 +198,7 @@ bool getGeoLocation(String publicIP, float &latitude, float &longitude)
       String status = doc["status"].as<String>();
       if (status != "success")
       {
-        Serial.println("Geolocation API returned an error");
+        SMB.println("Geolocation API returned an error");
         http.end();
         return false;
       }
@@ -209,15 +211,15 @@ bool getGeoLocation(String publicIP, float &latitude, float &longitude)
     }
     else
     {
-      Serial.print("Error on HTTP request: ");
-      Serial.println(httpResponseCode);
+      SMB.print("Error on HTTP request: ");
+      SMB.println(httpResponseCode);
       http.end();
       return false;
     }
   }
   else
   {
-    Serial.println("Ethernet not connected");
+    SMB.println("Ethernet not connected");
     return false;
   }
 }
@@ -228,7 +230,7 @@ float getSeaLevelPressure(float latitude, float longitude)
   {
     HTTPClient http;
     String url = "https://api.open-meteo.com/v1/forecast?latitude=" + String(latitude, 6) +
-                 "&longitude=" + String(longitude, 6) + "&current_weather=true&hourly=surface_pressure";
+                 "&longitude=" + String(longitude, 6) + "&hourly=surface_pressure";
 
     http.begin(url);
 
@@ -244,51 +246,45 @@ float getSeaLevelPressure(float latitude, float longitude)
       DeserializationError error = deserializeJson(doc, payload);
       if (error)
       {
-        Serial.print("JSON deserialization failed: ");
-        Serial.println(error.c_str());
+        SMB.print("JSON deserialization failed: ");
+        SMB.println(error.c_str());
         http.end();
         return 1013.25; // Default sea-level pressure
       }
 
-      const char *currentTime = doc["current_weather"]["time"]; // Get current time
       JsonArray timeArray = doc["hourly"]["time"];
       JsonArray pressureArray = doc["hourly"]["surface_pressure"];
 
-      // Find the index of the current time in the time array
-      int index = -1;
-      for (int i = 0; i < timeArray.size(); i++)
+      if (timeArray.size() > 0 && pressureArray.size() > 0)
       {
-        if (String(timeArray[i].as<const char *>()) == String(currentTime))
-        {
-          index = i;
-          break;
-        }
-      }
+        // Get the last available data point (latest time and pressure)
+        int lastIndex = timeArray.size() - 1;
+        float seaLevelPressure = pressureArray[lastIndex].as<float>();
 
-      if (index != -1)
-      {
-        float seaLevelPressure = pressureArray[index].as<float>();
+        // SMB.print("Latest available time: ");
+        // SMB.println(timeArray[lastIndex].as<const char *>()); // Log the latest time for debugging
+
         http.end();
         return seaLevelPressure;
       }
       else
       {
-        Serial.println("Current time not found in hourly data");
+        SMB.println("No hourly data found");
         http.end();
         return 1018.7; // Default sea-level pressure
       }
     }
     else
     {
-      Serial.print("Error on HTTP request: ");
-      Serial.println(httpResponseCode);
+      SMB.print("Error on HTTP request: ");
+      SMB.println(httpResponseCode);
       http.end();
       return 1018.7; // Default sea-level pressure
     }
   }
   else
   {
-    Serial.println("Ethernet not connected");
+    SMB.println("Ethernet not connected");
     return 1018.7;
   }
 }
@@ -320,8 +316,8 @@ void printMQTTMessage()
 
   char buffer[512];
   serializeJson(jsonDoc, buffer);
-  Serial.println("MQTT Payload");
-  Serial.println(buffer);
+  SMB.println("MQTT Payload");
+  SMB.println(buffer);
   // client.publish(mqtt_topic.c_str(), buffer, 512);
 }
 
@@ -347,7 +343,7 @@ void sendMQTTMessage()
   float latitude = 0.0, longitude = 0.0;
   if (!getGeoLocation(getPublicIP(), latitude, longitude))
   {
-    Serial.println("Unable to obtain geolocation");
+    SMB.println("Unable to obtain geolocation");
   }
   else
   {
@@ -387,17 +383,17 @@ int connectMQTT()
 {
   if (!client.connected())
   {
-    Serial.print("Attempting MQTT connection...");
+    SMB.print("Attempting MQTT connection...");
     String clientID = randomString(TrackerID);
     if (client.connect(clientID.c_str(), mqtt_user, mqtt_password))
     {
-      Serial.println("connected");
+      SMB.println("connected");
     }
     else
     {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
+      SMB.print("failed, rc=");
+      SMB.print(client.state());
+      SMB.println(" try again in 5 seconds");
       delay(5000);
     }
     return 0;
@@ -414,11 +410,11 @@ void setup()
   // Wire.begin();
   // Initialize Ethernet
   TrackerID = String(WiFi.macAddress());
-  Serial.print("TrackerID: ");
-  Serial.println(TrackerID);
+  SMB.print("TrackerID: ");
+  SMB.println(TrackerID);
   mqtt_topic = "SensorData/" + TrackerID;
-  Serial.print("MQTT Topic: ");
-  Serial.println(mqtt_topic);
+  SMB.print("MQTT Topic: ");
+  SMB.println(mqtt_topic);
 
   pinMode(LED, OUTPUT);
   sensors.auto_setup("ESP32_WIFI_COMM", esp32_wifi_comm_begin, 5, 1);
@@ -443,7 +439,7 @@ void setup()
   // Use one of the ADC pins for the random seed
   randomSeed(micros());
 
-  Serial.println("Random Seed initialized.");
+  SMB.println("Random Seed initialized.");
   // for (int i = 0; i < 20; i++)
   // {
   //   printMQTTMessage();
@@ -476,7 +472,7 @@ void loop()
   SMB.loop();
   loop_limit_switch();
   comm.loop(); // This ensures the communication module processes any incoming messages
-  
+
   pms_sensor.pms_loop();
   if (eth_connected && connectMQTT())
   {

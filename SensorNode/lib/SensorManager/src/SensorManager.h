@@ -28,10 +28,10 @@ public:
         sensorStatus[sensorName] = setupSuccess;
 
         // Optionally, log the result to the serial monitor
-        Serial.print("Setup ");
-        Serial.print(sensorName);
-        Serial.print(" ");
-        Serial.println(setupSuccess ? "succeeded." : "failed.");
+        SMB.print("Setup ");
+        SMB.print(sensorName);
+        SMB.print(" ");
+        SMB.println(setupSuccess ? "succeeded." : "failed.");
     }
 
     // Method to check if a sensor setup failed
@@ -126,5 +126,5 @@ private:
 //     Serial = CustomSerial;
 
 //     // Example usage
-//     Serial.println("Hello, this is a test message!");
+//     SMB.println("Hello, this is a test message!");
 // }

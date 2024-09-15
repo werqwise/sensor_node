@@ -36,8 +36,8 @@ int setup_inmp441()
 
     i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
     int err_code = i2s_set_pin(I2S_NUM_0, &i2s_mic_pins);
-    Serial.print("err_code INMP441: ");
-    Serial.println(err_code);
+    SMB.print("err_code INMP441: ");
+    SMB.println(err_code);
     return 1;
 }
 
@@ -68,7 +68,7 @@ float get_db()
     float rms = calculateRMS(raw_samples, samples_read);
     float spl = calculateSPL(rms, 0.00002); // Reference pressure 20 µPa
 
-    Serial.printf("RMS: %f, SPL: %f dB\n", rms, spl);
+    // SMB.printf("RMS: %f, SPL: %f dB\n", rms, spl);
 
     // Check for patterns indicating no sensor
     if (rms < 0.00001 || spl <= -92.0 || isinf(spl))

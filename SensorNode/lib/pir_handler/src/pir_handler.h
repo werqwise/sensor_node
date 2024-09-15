@@ -85,12 +85,12 @@ PirSensor motion = PirSensor(MOTION_SENSOR_PIN, 2, false, false);
 int setup_pir()
 {
     int result = motion.begin();
-    Serial.print("PIR sensor setup result: ");
-    Serial.println(result);
+    SMB.print("PIR sensor setup result: ");
+    SMB.println(result);
     // Assuming begin() returns a meaningful result you can check
     if (result != 1)
     {
-        Serial.println("Error initializing PIR sensor!");
+        SMB.println("Error initializing PIR sensor!");
         return 0;
     }
     else

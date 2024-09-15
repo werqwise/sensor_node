@@ -1,14 +1,16 @@
-#ifndef MY_SERIAL_H
-#define MY_SERIAL_H
+#ifndef MQTT_SERIAL_H
+#define MQTT_SERIAL_H
 
 #include <Arduino.h>
 #include <HardwareSerial.h>
 #include <PubSubClient.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 
-class SerialMqttBridge : public Print {
+class MqttSerial : public Print {
 public:
     // Constructor
-    SerialMqttBridge(HardwareSerial &serial, PubSubClient &mqttClient, String topic);
+    MqttSerial(HardwareSerial &serial, PubSubClient &mqttClient, String topic);
 
     // Override write methods
     virtual size_t write(uint8_t character) override;
@@ -27,6 +29,9 @@ private:
     String _topic;              // MQTT topic to publish to
     String _bufferedData;       // Buffer to store data until MQTT is ready
     bool _mqttReady;            // Flag to indicate if MQTT client is ready
+
+    // Mutex for synchronization
+    SemaphoreHandle_t _mutex;
 };
 
-#endif // MY_SERIAL_H
+#endif // MQTT_SERIAL_H

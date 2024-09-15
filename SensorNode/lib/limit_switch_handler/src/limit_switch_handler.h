@@ -57,15 +57,15 @@ void loop_limit_switch()
 // this function will be called when the button started long pressed.
 void LongPressStart(void *oneButton)
 {
-    // Serial.print(((OneButton *)oneButton)->getPressedMs());
-    // Serial.println("\t - LongPressStart()");
+    // SMB.print(((OneButton *)oneButton)->getPressedMs());
+    // SMB.println("\t - LongPressStart()");
     limit_sw_state = 1;
 }
 
 void LongPressStop(void *oneButton)
 {
-    //   Serial.print(((OneButton *)oneButton)->getPressedMs());
-    //   Serial.println("\t - LongPressStop()\n");
+    //   SMB.print(((OneButton *)oneButton)->getPressedMs());
+    //   SMB.println("\t - LongPressStop()\n");
     // limit_sw_state = 0;
     // Call the callback function if it is set
     if (longPressStopCallback)

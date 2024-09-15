@@ -9,7 +9,7 @@ Adafruit_BME680 bme; // I2C
 int setup_bme680()
 {
 
-    Serial.println(F("BME280 test"));
+    SMB.println(F("BME280 test"));
 
     unsigned status;
 
@@ -18,7 +18,7 @@ int setup_bme680()
 
     if (!status)
     {
-        Serial.println("Could not find a valid BME280 sensor, check wiring.");
+        SMB.println("Could not find a valid BME280 sensor, check wiring.");
         return 0;
     }
     else
@@ -30,9 +30,9 @@ int setup_bme680()
         bme.setIIRFilterSize(BME680_FILTER_SIZE_3);
         bme.setGasHeater(320, 150); // 320*C for 150 ms
     }
-    Serial.println("-- Default Test --");
+    SMB.println("-- Default Test --");
 
-    Serial.println();
+    SMB.println();
     return 1;
 }
 
@@ -48,9 +48,9 @@ float get_pressure()
 
 float get_altitude(float seaLevelPressure)
 {
-    return (1.0 - pow((float)get_pressure() / seaLevelPressure, 0.190284)) * 287.15 / 0.0065;
+    // return (1.0 - pow((float)get_pressure() / seaLevelPressure, 0.190284)) * 287.15 / 0.0065;
 
-    // return bme.readAltitude(seaLevelPressure);
+    return bme.readAltitude(seaLevelPressure);
 }
 
 float get_humidity()

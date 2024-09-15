@@ -89,7 +89,7 @@ bool ESP32Comm::send(String message)
     {
         return _client.println(message);
     }
-    Serial.println("Cannot send message: client not connected");
+    SMB.println("Cannot send message: client not connected");
     return false;
 }
 
@@ -129,30 +129,30 @@ void ESP32Comm::reconnect()
     if (now - _lastReconnectAttempt > 5000)
     {
         _lastReconnectAttempt = now;
-        Serial.println("Attempting to reconnect...");
+        SMB.println("Attempting to reconnect...");
         if (WiFi.status() != WL_CONNECTED)
         {
-            Serial.println("WiFi not connected. Reconnecting to WiFi...");
+            SMB.println("WiFi not connected. Reconnecting to WiFi...");
             WiFi.begin(_ssid, _password);
             delay(5000); // Wait for WiFi connection
         }
         if (WiFi.status() == WL_CONNECTED)
         {
-            Serial.print("Connecting to server at ");
-            Serial.println(WiFi.gatewayIP());
+            SMB.print("Connecting to server at ");
+            SMB.println(WiFi.gatewayIP());
             if (_client.connect(WiFi.gatewayIP(), _port))
             {
-                Serial.println("Connected to server");
+                SMB.println("Connected to server");
                 _lastReconnectAttempt = 0;
             }
             else
             {
-                Serial.println("Failed to connect to server");
+                SMB.println("Failed to connect to server");
             }
         }
         else
         {
-            Serial.println("Failed to connect to WiFi");
+            SMB.println("Failed to connect to WiFi");
         }
     }
 }

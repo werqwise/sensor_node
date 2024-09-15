@@ -18,19 +18,19 @@ SCD40SensorData SensorData = {0, 0.0f, 0.0f, false};
 
 void printUint16Hex(uint16_t value)
 {
-    Serial.print(value < 4096 ? "0" : "");
-    Serial.print(value < 256 ? "0" : "");
-    Serial.print(value < 16 ? "0" : "");
-    Serial.print(value, HEX);
+    SMB.print(value < 4096 ? "0" : "");
+    SMB.print(value < 256 ? "0" : "");
+    SMB.print(value < 16 ? "0" : "");
+    SMB.print(value, HEX);
 }
 
 void printSerialNumber(uint16_t serial0, uint16_t serial1, uint16_t serial2)
 {
-    Serial.print("Serial: 0x");
+    SMB.print("Serial: 0x");
     printUint16Hex(serial0);
     printUint16Hex(serial1);
     printUint16Hex(serial2);
-    Serial.println();
+    SMB.println();
 }
 
 int64_t setup_scd40()
@@ -47,9 +47,9 @@ int64_t setup_scd40()
     error = scd4x.stopPeriodicMeasurement();
     if (error)
     {
-        Serial.print("Error trying to execute stopPeriodicMeasurement(): ");
+        SMB.print("Error trying to execute stopPeriodicMeasurement(): ");
         errorToString(error, errorMessage, 256);
-        Serial.println(errorMessage);
+        SMB.println(errorMessage);
         return 0;
     }
 
@@ -59,9 +59,9 @@ int64_t setup_scd40()
     error = scd4x.getSerialNumber(serial0, serial1, serial2);
     if (error)
     {
-        Serial.print("Error trying to execute getSerialNumber(): ");
+        SMB.print("Error trying to execute getSerialNumber(): ");
         errorToString(error, errorMessage, 256);
-        Serial.println(errorMessage);
+        SMB.println(errorMessage);
     }
     else
     {
@@ -72,12 +72,12 @@ int64_t setup_scd40()
     error = scd4x.startPeriodicMeasurement();
     if (error)
     {
-        Serial.print("Error trying to execute startPeriodicMeasurement(): ");
+        SMB.print("Error trying to execute startPeriodicMeasurement(): ");
         errorToString(error, errorMessage, 256);
-        Serial.println(errorMessage);
+        SMB.println(errorMessage);
     }
 
-    Serial.println("Waiting for first measurement... (5 sec)");
+    SMB.println("Waiting for first measurement... (5 sec)");
     return 1;
 }
 
@@ -96,9 +96,9 @@ SCD40SensorData getSensorData()
     error = scd4x.getDataReadyFlag(isDataReady);
     if (error)
     {
-        Serial.print("Error trying to execute getDataReadyFlag(): ");
+        SMB.print("Error trying to execute getDataReadyFlag(): ");
         errorToString(error, errorMessage, 256);
-        Serial.println(errorMessage);
+        SMB.println(errorMessage);
         return SensorData;
     }
 
@@ -110,14 +110,14 @@ SCD40SensorData getSensorData()
     error = scd4x.readMeasurement(co2, temperature, humidity);
     if (error)
     {
-        Serial.print("Error trying to execute readMeasurement(): ");
+        SMB.print("Error trying to execute readMeasurement(): ");
         errorToString(error, errorMessage, 256);
-        Serial.println(errorMessage);
+        SMB.println(errorMessage);
         return SensorData;
     }
     else if (co2 == 0)
     {
-        Serial.println("Invalid sample detected, skipping.");
+        SMB.println("Invalid sample detected, skipping.");
         return SensorData;
     }
     else

@@ -1,20 +1,25 @@
 #include "transparent_serial.h"
 
-SerialMqttBridge::SerialMqttBridge(HardwareSerial &serial, PubSubClient &mqttClient, String topic)
+MqttSerial::MqttSerial(HardwareSerial &serial, PubSubClient &mqttClient, String topic)
     : _serial(serial), _mqttClient(mqttClient), _topic(topic), _mqttReady(false) {
+    // Create a mutex
+    _mutex = xSemaphoreCreateMutex();
 }
 
-void SerialMqttBridge::begin(unsigned long baudrate) {
+void MqttSerial::begin(unsigned long baudrate) {
     _serial.begin(baudrate);
 }
 
-void SerialMqttBridge::end() {
+void MqttSerial::end() {
     _serial.end();
 }
 
-size_t SerialMqttBridge::write(uint8_t character) {
+size_t MqttSerial::write(uint8_t character) {
     // Output to Serial Monitor
     _serial.write(character);
+
+    // Acquire mutex
+    xSemaphoreTake(_mutex, portMAX_DELAY);
 
     // Append character to buffer
     _bufferedData += (char)character;
@@ -25,12 +30,18 @@ size_t SerialMqttBridge::write(uint8_t character) {
         _mqttClient.publish(_topic.c_str(), buf);
     }
 
+    // Release mutex
+    xSemaphoreGive(_mutex);
+
     return 1;
 }
 
-size_t SerialMqttBridge::write(const uint8_t *buffer, size_t size) {
+size_t MqttSerial::write(const uint8_t *buffer, size_t size) {
     // Output to Serial Monitor
     _serial.write(buffer, size);
+
+    // Acquire mutex
+    xSemaphoreTake(_mutex, portMAX_DELAY);
 
     // Append buffer to the buffered data
     _bufferedData += String((const char*)buffer, size);
@@ -40,10 +51,16 @@ size_t SerialMqttBridge::write(const uint8_t *buffer, size_t size) {
         _mqttClient.publish(_topic.c_str(), buffer, size);
     }
 
+    // Release mutex
+    xSemaphoreGive(_mutex);
+
     return size;
 }
 
-void SerialMqttBridge::loop() {
+void MqttSerial::loop() {
+    // Acquire mutex
+    xSemaphoreTake(_mutex, portMAX_DELAY);
+
     // Check if MQTT client is connected and was not ready before
     if (!_mqttReady && _mqttClient.connected()) {
         _mqttReady = true;
@@ -54,4 +71,7 @@ void SerialMqttBridge::loop() {
             _bufferedData = "";  // Clear the buffer
         }
     }
+
+    // Release mutex
+    xSemaphoreGive(_mutex);
 }
