@@ -1,6 +1,7 @@
 
 // Sensor Node; Could be unlimited in number
 #include <Arduino.h>
+#include <transparent_serial.h>
 #include <driver/adc.h>
 #include <ArduinoJson.h>
 #include <SensorManager.h>
@@ -18,6 +19,7 @@
 #include "SStack.h"
 #include <TaskScheduler.h> // Include TaskScheduler library
 #include <esp32_comm.h>
+#include <HTTPClient.h>
 
 static bool eth_connected = false;
 #define LED 2 // GPIO number of connected LED, ON ESP-12 IS GPIO2
@@ -26,6 +28,10 @@ static bool eth_connected = false;
 #define BLINK_DURATION 100 // milliseconds LED is on for
 
 const char *device_type = "POE";
+// API servers
+const char *ipServer = "https://api.ipify.org?format=json";
+const char *geoServer = "http://ip-api.com";
+const char *weatherServer = "https://api.open-meteo.com";
 // MQTT Configurations
 const char *mqtt_server = "mqtt.iot.werqwall.com";
 const int mqtt_port = 1883;
@@ -46,7 +52,8 @@ void delayReceivedCallback(uint32_t from, int32_t delay);
 void customLongPressStopFunction(void *oneButton);
 void onESP32WiFiReceive(String message);
 void mqtt_callback(char *topic, byte *payload, unsigned int length);
-
+float getSeaLevelPressure(float latitude, float longitude);
+String getPublicIP();
 Scheduler userScheduler; // to control your personal task
 
 bool calc_delay = false;
@@ -109,6 +116,11 @@ float healthTimer = 0;
 WiFiClient ethClient;
 PubSubClient client(ethClient);
 
+// Create an instance of MySerial
+// Using String for topic
+String mqttTopic = String(WiFi.macAddress()) + String("/logs");
+SerialMqttBridge SMB(Serial, client, mqttTopic);
+
 void setupMQTT()
 {
   client.setServer(mqtt_server, mqtt_port);
@@ -137,6 +149,149 @@ void onESP32WiFiReceive(String message)
   }
 }
 
+// Function to get public IP address
+String getPublicIP()
+{
+  if (eth_connected)
+  {
+    HTTPClient http;
+    String publicIP;
+    String status = "";
+    http.begin("https://api.ipify.org"); // Specify the URL
+
+    status = http.GET() > 0 ? http.getString() : "N\\A";
+
+    http.end(); // Free the resources
+    return status;
+  }
+}
+// Function to get geolocation based on public IP
+bool getGeoLocation(String publicIP, float &latitude, float &longitude)
+{
+  if (eth_connected)
+  {
+    HTTPClient http;
+    String url = "http://ip-api.com/json/" + publicIP;
+
+    http.begin(url); // Specify the URL
+
+    int httpResponseCode = http.GET();
+
+    if (httpResponseCode > 0)
+    {
+      String payload = http.getString();
+
+      // Parse JSON response
+      const size_t capacity = JSON_OBJECT_SIZE(14) + 350;
+      DynamicJsonDocument doc(capacity);
+      DeserializationError error = deserializeJson(doc, payload);
+      if (error)
+      {
+        Serial.print("Failed to parse geolocation JSON: ");
+        Serial.println(error.c_str());
+        http.end();
+        return false;
+      }
+
+      String status = doc["status"].as<String>();
+      if (status != "success")
+      {
+        Serial.println("Geolocation API returned an error");
+        http.end();
+        return false;
+      }
+
+      latitude = doc["lat"].as<float>();
+      longitude = doc["lon"].as<float>();
+
+      http.end();
+      return true;
+    }
+    else
+    {
+      Serial.print("Error on HTTP request: ");
+      Serial.println(httpResponseCode);
+      http.end();
+      return false;
+    }
+  }
+  else
+  {
+    Serial.println("Ethernet not connected");
+    return false;
+  }
+}
+
+float getSeaLevelPressure(float latitude, float longitude)
+{
+  if (eth_connected)
+  {
+    HTTPClient http;
+    String url = "https://api.open-meteo.com/v1/forecast?latitude=" + String(latitude, 6) +
+                 "&longitude=" + String(longitude, 6) + "&current_weather=true&hourly=surface_pressure";
+
+    http.begin(url);
+
+    int httpResponseCode = http.GET();
+
+    if (httpResponseCode > 0)
+    {
+      String payload = http.getString();
+
+      // Parse JSON response
+      DynamicJsonDocument doc(8192); // Adjust size as needed
+
+      DeserializationError error = deserializeJson(doc, payload);
+      if (error)
+      {
+        Serial.print("JSON deserialization failed: ");
+        Serial.println(error.c_str());
+        http.end();
+        return 1013.25; // Default sea-level pressure
+      }
+
+      const char *currentTime = doc["current_weather"]["time"]; // Get current time
+      JsonArray timeArray = doc["hourly"]["time"];
+      JsonArray pressureArray = doc["hourly"]["surface_pressure"];
+
+      // Find the index of the current time in the time array
+      int index = -1;
+      for (int i = 0; i < timeArray.size(); i++)
+      {
+        if (String(timeArray[i].as<const char *>()) == String(currentTime))
+        {
+          index = i;
+          break;
+        }
+      }
+
+      if (index != -1)
+      {
+        float seaLevelPressure = pressureArray[index].as<float>();
+        http.end();
+        return seaLevelPressure;
+      }
+      else
+      {
+        Serial.println("Current time not found in hourly data");
+        http.end();
+        return 1018.7; // Default sea-level pressure
+      }
+    }
+    else
+    {
+      Serial.print("Error on HTTP request: ");
+      Serial.println(httpResponseCode);
+      http.end();
+      return 1018.7; // Default sea-level pressure
+    }
+  }
+  else
+  {
+    Serial.println("Ethernet not connected");
+    return 1018.7;
+  }
+}
 void printMQTTMessage()
 {
   JsonDocument jsonDoc;
@@ -145,7 +300,7 @@ void printMQTTMessage()
   jsonDoc["temperature"] = get_temperature();
   jsonDoc["humidity"] = get_humidity();
   jsonDoc["pressure"] = get_pressure();
-  jsonDoc["altitude"] = get_altitude();
+  // jsonDoc["altitude"] = get_altitude();
   jsonDoc["gas"] = get_gas();
   jsonDoc["noise_level"] = get_db();
   jsonDoc["PM_AE_UG_1_0"] = pms_sensor.getPM1_0();
@@ -177,6 +332,7 @@ int esp32_wifi_comm_begin()
 
   return 1;
 }
+
 void sendMQTTMessage()
 {
 
@@ -187,7 +343,21 @@ void sendMQTTMessage()
   jsonDoc["temperature"] = get_temperature();
   jsonDoc["humidity"] = get_humidity();
   jsonDoc["pressure"] = get_pressure();
-  jsonDoc["altitude"] = get_altitude();
+  // Get geolocation
+  float latitude = 0.0, longitude = 0.0;
+  if (!getGeoLocation(getPublicIP(), latitude, longitude))
+  {
+    Serial.println("Unable to obtain geolocation");
+  }
+  else
+  {
+    float seaLevelPressure = getSeaLevelPressure(latitude, longitude);
+    jsonDoc["altitude"] = get_altitude(seaLevelPressure);
+    jsonDoc["latitude"] = String(latitude);
+    jsonDoc["longitude"] = String(longitude);
+    jsonDoc["seaLevelPressures"] = String(seaLevelPressure);
+  }
+
   jsonDoc["gas"] = get_gas();
   jsonDoc["noise_level"] = get_db();
   jsonDoc["PM_AE_UG_1_0"] = pms_sensor.getPM1_0();
@@ -204,8 +374,7 @@ void sendMQTTMessage()
   jsonDoc["ldr"] = get_ldr();
   jsonDoc["limit_sw"] = get_limit_sw_state();
   jsonDoc["pir"] = get_pir();
-  
-
+  jsonDoc["publicIp"] = getPublicIP();
   char buffer[512];
 
   size_t n = serializeJson(jsonDoc, buffer);
@@ -240,7 +409,7 @@ int connectMQTT()
 }
 void setup()
 {
-  Serial.begin(115200);
+  SMB.begin(115200);
   // Wire.setPins(13, 16);
   // Wire.begin();
   // Initialize Ethernet
@@ -304,9 +473,10 @@ void customLongPressStopFunction(void *oneButton)
 
 void loop()
 {
+  SMB.loop();
   loop_limit_switch();
   comm.loop(); // This ensures the communication module processes any incoming messages
-
+  
   pms_sensor.pms_loop();
   if (eth_connected && connectMQTT())
   {

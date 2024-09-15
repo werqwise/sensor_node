@@ -46,9 +46,11 @@ float get_pressure()
     return (bme.readPressure() / 100.0F);
 }
 
-float get_altitude()
+float get_altitude(float seaLevelPressure)
 {
-    return bme.readAltitude(SEALEVELPRESSURE_HPA);
+    return (1.0 - pow((float)get_pressure() / seaLevelPressure, 0.190284)) * 287.15 / 0.0065;
+
+    // return bme.readAltitude(seaLevelPressure);
 }
 
 float get_humidity()

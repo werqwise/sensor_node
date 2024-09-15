@@ -81,7 +81,7 @@ void setLongPressStopCallback(LongPressStopCallback callback)
 int get_limit_sw_state()
 {
     // limit_sw_state=digitalRead(PIN_INPUT);
-    return limit_sw_state;
+    return !limit_sw_state;
 }
 
 void clear_limit_sw_state()
