@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ESP32 OTA Update Server</title>
+    <script>
+        // Function to fetch the list of devices
+        function fetchDevices() {
+            fetch('/devices')
+                .then(response => response.json())
+                .then(devices => {
+                    let deviceList = document.getElementById('device-list');
+                    deviceList.innerHTML = '';  // Clear existing devices
+                    devices.forEach(mac => {
+                        let checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.name = 'macs';
+                        checkbox.value = mac;
+                        let label = document.createElement('label');
+                        label.textContent = mac;
+                        let br = document.createElement('br');
+                        deviceList.appendChild(checkbox);
+                        deviceList.appendChild(label);
+                        deviceList.appendChild(br);
+                    });
+                });
+        }
+
+        // Fetch devices every 5 seconds
+        setInterval(fetchDevices, 5000);
+    </script>
+</head>
+<body>
+    <h1>Upload Firmware</h1>
+    <form method="post" enctype="multipart/form-data">
+        <label for="version">Firmware Version:</label>
+        <input type="text" id="version" name="version" required><br><br>
+        <label for="file">Firmware File (.bin):</label>
+        <input type="file" id="file" name="file" accept=".bin" required><br><br>
+
+        <h2>Select Devices to Update:</h2>
+        <div id="device-list">
+            <!-- Dynamic content will be inserted here -->
+        </div>
+
+        <input type="submit" value="Upload Firmware">
+    </form>
+</body>
+</html>

@@ -9,6 +9,7 @@
 #include <PubSubClient.h>
 #include "SStack.h"
 #include <TaskScheduler.h> // Include TaskScheduler library
+#include <ota_manager.h>
 
 WiFiClient ethClient;
 PubSubClient client(ethClient);
@@ -17,6 +18,11 @@ PubSubClient client(ethClient);
 // Using String for topic
 String mqttTopic = String("SensorData/") + String(WiFi.macAddress()) + String("/logs");
 MqttSerial SMB(Serial, client, mqttTopic);
+
+// Server URL (replace with your server's address)
+const char *serverUrl = "http://ota-app.iot.werqwall.com";
+
+ESP32_OTA ota(serverUrl);
 
 #include <SensorManager.h>
 #include <bme680_handler.h>
@@ -48,6 +54,7 @@ const char *mqtt_user = "mqtt_client";
 const char *mqtt_password = "mqtt_client";
 String mqtt_topic;
 String uwb_msg = "";
+uint8_t do_ota = 0;
 // Prototypes
 void sendMessage();
 int connectMQTT();
@@ -77,14 +84,29 @@ ESP32Comm comm(true, "master-esp32", "master-pass"); // Master example
 
 void mqtt_callback(char *topic, byte *payload, unsigned int length)
 {
-  SMB.print("Message arrived [");
-  SMB.print(topic);
-  SMB.print("] ");
+  // Convert topic to Arduino String
+  String topicStr = String(topic);
+
+  // Convert payload to Arduino String
+  String payloadStr;
   for (int i = 0; i < length; i++)
   {
-    SMB.print((char)payload[i]);
+    payloadStr += (char)payload[i];
   }
-  SMB.println();
+
+  // Print the topic and payload for debugging
+  String ota_topic = String("SensorData/") + String(WiFi.macAddress()) + String("/do_ota");
+  SMB.print("Message arrived [");
+  SMB.print(topicStr);
+  SMB.print("] ");
+  SMB.println(payloadStr);
+
+  // Check if the topic is "macaddress/do_ota" and payload contains "do_ota"
+  if (topicStr.equals(ota_topic) && payloadStr.indexOf("do_ota") >= 0)
+  {
+    ota.begin();
+    ota.handle();
+  }
 }
 
 void onEvent(arduino_event_id_t event)
@@ -371,6 +393,7 @@ void sendMQTTMessage()
   jsonDoc["limit_sw"] = get_limit_sw_state();
   jsonDoc["pir"] = get_pir();
   jsonDoc["publicIp"] = getPublicIP();
+  jsonDoc["version"] = String("v1.1");
   char buffer[512];
 
   size_t n = serializeJson(jsonDoc, buffer);
@@ -452,6 +475,8 @@ void setup()
   }
 
   delay(100);
+  String ota_topic_subs = String("SensorData/") + String(WiFi.macAddress()) + String("/do_ota");
+  client.subscribe(ota_topic_subs.c_str());
   sendMQTTMessage();
 
   userScheduler.addTask(taskSendMessage);
@@ -470,6 +495,7 @@ void customLongPressStopFunction(void *oneButton)
 void loop()
 {
   SMB.loop();
+
   loop_limit_switch();
   comm.loop(); // This ensures the communication module processes any incoming messages
 
