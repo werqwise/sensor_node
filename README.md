@@ -109,7 +109,7 @@ Everything is already configured for Sensor Nodes Firmware and can be uploaded t
 
 
 ## Circuit <a name = "circuit"></a>
-![Circuit Schematics](circuit/circuit_bb.png)
+![Circuit Schematics](circuit/circuit_bbs.png)
 
 ## Schematics
 
