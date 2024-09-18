@@ -55,6 +55,7 @@ const char *mqtt_password = "mqtt_client";
 String mqtt_topic;
 String uwb_msg = "";
 uint8_t do_ota = 0;
+int aqi_value = -1;
 // Prototypes
 void sendMessage();
 int connectMQTT();
@@ -104,6 +105,7 @@ void mqtt_callback(char *topic, byte *payload, unsigned int length)
   // Check if the topic is "macaddress/do_ota" and payload contains "do_ota"
   if (topicStr.equals(ota_topic) && payloadStr.indexOf("do_ota") >= 0)
   {
+    digitalWrite(LED, HIGH);
     ota.begin();
     ota.handle();
   }
@@ -382,6 +384,10 @@ void sendMQTTMessage()
   jsonDoc["PM_AE_UG_2_5"] = pms_sensor.getPM2_5();
   jsonDoc["PM_AE_UG_10_0"] = pms_sensor.getPM10_0();
   jsonDoc["co2"] = getCO2();
+  if (aqi_value != -1 && aqi_value != 0)
+  {
+    jsonDoc["aqi"] = aqi_value;
+  }
   if (radarInterface.isTargetPresent())
   {
     jsonDoc["radar_stationary_dist"] = radarInterface.getStationaryDistance();
@@ -393,7 +399,7 @@ void sendMQTTMessage()
   jsonDoc["limit_sw"] = get_limit_sw_state();
   jsonDoc["pir"] = get_pir();
   jsonDoc["publicIp"] = getPublicIP();
-  jsonDoc["version"] = String("v1.1");
+  jsonDoc["version"] = String("v1.3");
   char buffer[512];
 
   size_t n = serializeJson(jsonDoc, buffer);
@@ -500,7 +506,8 @@ void loop()
   comm.loop(); // This ensures the communication module processes any incoming messages
 
   pms_sensor.pms_loop();
-  if (eth_connected && connectMQTT())
+  aqi_value = pms_sensor.calculateAQI();
+  if (eth_connected && connectMQTT() && do_ota == 0)
   {
     digitalWrite(LED, false);
   }

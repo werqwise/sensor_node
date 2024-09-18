@@ -73,6 +73,16 @@ public:
     bool isDataReady() { return pmsData.dataReady; }
     void resetDataReady() { pmsData.dataReady = false; }
 
+    // Function to calculate AQI based on PM2.5 and PM10
+    int calculateAQI()
+    {
+        int aqi_pm25 = calculatePM25AQI(pmsData.PM_AE_UG_2_5);
+        int aqi_pm10 = calculatePM10AQI(pmsData.PM_AE_UG_10_0);
+
+        // Return the higher AQI of the two (PM2.5 or PM10)
+        return max(aqi_pm25, aqi_pm10);
+    }
+
 private:
     HardwareSerial serial2; // Use HardwareSerial instead of SoftwareSerial
 
@@ -101,4 +111,38 @@ private:
 
     PMSState currentState = SLEEPING;
     unsigned long stateStartTime = 0;
+    // Helper functions to calculate AQI for PM2.5 and PM10
+    int calculatePM25AQI(uint16_t pm25)
+    {
+        if (pm25 <= 12.0)
+            return map(pm25, 0.0, 12.0, 0, 50);
+        else if (pm25 <= 35.4)
+            return map(pm25, 12.1, 35.4, 51, 100);
+        else if (pm25 <= 55.4)
+            return map(pm25, 35.5, 55.4, 101, 150);
+        else if (pm25 <= 150.4)
+            return map(pm25, 55.5, 150.4, 151, 200);
+        else if (pm25 <= 250.4)
+            return map(pm25, 150.5, 250.4, 201, 300);
+        else if (pm25 <= 500.4)
+            return map(pm25, 250.5, 500.4, 301, 500);
+        return -1; // Invalid range
+    }
+
+    int calculatePM10AQI(uint16_t pm10)
+    {
+        if (pm10 <= 54.0)
+            return map(pm10, 0.0, 54.0, 0, 50);
+        else if (pm10 <= 154.0)
+            return map(pm10, 55, 154, 51, 100);
+        else if (pm10 <= 254.0)
+            return map(pm10, 155, 254, 101, 150);
+        else if (pm10 <= 354.0)
+            return map(pm10, 255, 354, 151, 200);
+        else if (pm10 <= 424.0)
+            return map(pm10, 355, 424, 201, 300);
+        else if (pm10 <= 604.0)
+            return map(pm10, 425, 604, 301, 500);
+        return -1; // Invalid range
+    }
 };
